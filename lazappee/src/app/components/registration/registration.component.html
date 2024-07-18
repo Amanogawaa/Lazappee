@@ -1,1 +1,92 @@
-<p>registration works!</p>
+<!-- component -->
+<div
+  class="min-h-screen flex items-center justify-center w-full dark:bg-gray-950"
+>
+  <div
+    class="bg-white dark:bg-gray-900 shadow-md rounded-lg px-8 py-6 max-w-md w-full"
+  >
+    <h1 class="text-2xl font-bold text-center mb-4 dark:text-gray-200">
+      Register Here!
+    </h1>
+    <form class="w-full" [formGroup]="registerForm" (ngSubmit)="registerUser()">
+      <div class="grid grid-cols-2 gap-2">
+        <div class="mb-4">
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >First name</label
+          >
+          <input
+            type="text"
+            formControlName="first_name"
+            class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >Last name</label
+          >
+          <input
+            type="text"
+            formControlName="last_name"
+            class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+        </div>
+      </div>
+      <div class="mb-4">
+        <label
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >Username</label
+        >
+        <input
+          formControlName="username"
+          type="text"
+          class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >Email</label
+        >
+        <input
+          type="email"
+          formControlName="email"
+          class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label
+          for="password"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >Password</label
+        >
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          required
+        />
+      </div>
+      <div class="flex items-center justify-between mb-4">
+        <div
+          routerLink="/login"
+          class="text-xs text-indigo-500 cursor-pointer hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Login here
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        Register
+      </button>
+    </form>
+  </div>
+</div>
