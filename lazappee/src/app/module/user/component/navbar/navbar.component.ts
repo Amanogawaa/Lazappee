@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { initFlowbite } from 'flowbite';
 import Swal from 'sweetalert2';
-import { ProductService } from '../../../../services/product.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,13 +11,11 @@ import { ProductService } from '../../../../services/product.service';
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent implements OnInit {
-  constructor(private router: Router, private productService: ProductService) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     initFlowbite();
   }
-
-  loadProduct() {}
 
   logout(): void {
     Swal.fire({

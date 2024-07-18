@@ -1,32 +1,16 @@
 import { Routes } from '@angular/router';
-import { HomapgeComponent } from './components/homapge/homapge.component';
+import { NavbarComponent } from './module/user/component/navbar/navbar.component';
 import { UserComponent } from './module/user/user.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'user',
     pathMatch: 'full',
   },
 
   {
-    path: 'login',
-    loadComponent: () =>
-      import('./components/login/login.component').then(
-        (c) => c.LoginComponent
-      ),
-  },
-
-  {
-    path: 'signup',
-    loadComponent: () =>
-      import('./components/registration/registration.component').then(
-        (c) => c.RegistrationComponent
-      ),
-  },
-
-  {
-    path: 'lazappee',
+    path: 'user',
     component: UserComponent,
     children: [
       {
@@ -41,6 +25,14 @@ export const routes: Routes = [
           import(
             './module/user/pages/product-page/product-page.component'
           ).then((e) => e.ProductPageComponent),
+      },
+
+      {
+        path: 'mysummary-page',
+        loadComponent: () =>
+          import(
+            './module/user/pages/mysummary-page/mysummary-page.component'
+          ).then((e) => e.MysummaryPageComponent),
       },
 
       {

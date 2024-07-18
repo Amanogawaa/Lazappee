@@ -19,10 +19,9 @@ class Post extends GlobalMethods
 
             $JwtController = new Jwt($_ENV["SECRET_KEY"]);
             $tokenData = [
-                "user_id" => $user['user_id'],
+                "id" => $user['id'],
                 "email" => $user['email'],
             ];
-
             $token = $JwtController->encode($tokenData);
 
             http_response_code(200);
@@ -35,7 +34,6 @@ class Post extends GlobalMethods
             }
         }
     }
-
 
     public function add_user($data)
     {

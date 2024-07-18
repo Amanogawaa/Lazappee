@@ -33,6 +33,7 @@ class Jwt
         $payload = json_encode($payload);
         $payload = $this->base64URLEncode($payload);
 
+
         $signature = hash_hmac("sha256", $header . "." . $payload, $this->key, true);
         $signature = $this->base64URLEncode($signature);
         return $header . "." . $payload . "." . $signature;

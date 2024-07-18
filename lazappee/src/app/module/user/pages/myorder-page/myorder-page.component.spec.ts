@@ -11,7 +11,7 @@ describe('MyorderPageComponent', () => {
       imports: [MyorderPageComponent]
     })
     .compileComponents();
-
+    
     fixture = TestBed.createComponent(MyorderPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HomapgeComponent } from './homapge.component';
+import { SellerComponent } from './seller.component';
 
-describe('HomapgeComponent', () => {
-  let component: HomapgeComponent;
-  let fixture: ComponentFixture<HomapgeComponent>;
+describe('SellerComponent', () => {
+  let component: SellerComponent;
+  let fixture: ComponentFixture<SellerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HomapgeComponent]
+      imports: [SellerComponent]
     })
     .compileComponents();
-
-    fixture = TestBed.createComponent(HomapgeComponent);
+    
+    fixture = TestBed.createComponent(SellerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

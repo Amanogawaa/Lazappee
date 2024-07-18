@@ -11,7 +11,7 @@ describe('MycartPageComponent', () => {
       imports: [MycartPageComponent]
     })
     .compileComponents();
-
+    
     fixture = TestBed.createComponent(MycartPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

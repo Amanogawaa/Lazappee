@@ -58,7 +58,7 @@ class Get extends GlobalMethods
     public function getByEmail(string $email = null): array|false
     {
         $conditions = ($email !== null) ? "email = '$email'" : null;
-        $result = $this->get_records('users', $conditions);
+        $result = $this->get_records('user', $conditions);
 
         if ($result['status']['remarks'] === 'success' && !empty($result['payload'])) {
             return $result['payload'][0];
