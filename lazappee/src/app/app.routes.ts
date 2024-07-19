@@ -1,12 +1,24 @@
 import { Routes } from '@angular/router';
 import { NavbarComponent } from './module/user/component/navbar/navbar.component';
 import { UserComponent } from './module/user/user.component';
+import { LoginComponent } from './login/login.component';
+import { SignupComponent } from './signup/signup.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'user',
+    redirectTo: 'login',
     pathMatch: 'full',
+  },
+
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
+
+  {
+    path: 'signup',
+    component: SignupComponent,
   },
 
   {

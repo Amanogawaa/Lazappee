@@ -66,4 +66,16 @@ class Get extends GlobalMethods
             return false;
         }
     }
+
+    public function getAllProducts($id = null)
+    {
+        $conditions = ($id !== null) ? "id = '$id'" : null;
+        $result = $this->get_records('products', $conditions);
+
+        if ($result['status']['remarks'] === 'success' && !empty($result['payload'])) {
+            return $result['payload'];
+        } else {
+            return $result['payload']['id'];
+        }
+    }
 }
