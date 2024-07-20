@@ -40,6 +40,14 @@ export const routes: Routes = [
       },
 
       {
+        path: 'product-detail/:id',
+        loadComponent: () =>
+          import(
+            './module/user/pages/product-details/product-details.component'
+          ).then((e) => e.ProductDetailsComponent),
+      },
+
+      {
         path: 'mysummary-page',
         loadComponent: () =>
           import(

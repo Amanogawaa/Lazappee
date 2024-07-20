@@ -78,4 +78,40 @@ class Get extends GlobalMethods
             return $result['payload']['id'];
         }
     }
+
+    public function getCart($id = null)
+    {
+        $conditions = ($id !== null) ? "id = '$id'" : null;
+        $result = $this->get_records('user_carts', $conditions);
+
+        if ($result['status']['remarks'] === 'success' && !empty($result['payload'])) {
+            return $result['payload'];
+        } else {
+            return $result['payload']['id'];
+        }
+    }
+
+    public function getCartItems($cartId)
+    {
+        $query = "
+            SELECT 
+                user_cart_items.id AS item_id,
+                user_cart_items.product_id,
+                user_cart_items.price,
+                user_cart_items.created_at,
+                user_cart_items.quantity,
+                user_carts.created_at AS cart_created_at
+            FROM user_cart_items
+            JOIN user_carts ON user_cart_items.cart_id = user_carts.id
+            WHERE user_carts.id = '$cartId'
+        ";
+
+        $result = $this->executeQuery($query);
+
+        if ($result['code'] == 200) {
+            return $this->sendPayload($result['data'], 'success', "Successfully retrieved cart items.", $result['code']);
+        } else {
+            return $this->sendPayload(null, 'failed', "Failed to retrieve cart items.", $result['code']);
+        }
+    }
 }

@@ -3,6 +3,7 @@ import { ProductsService } from '../../../../service/products.service';
 import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
 import Swal from 'sweetalert2';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-product-page',
@@ -13,17 +14,13 @@ import Swal from 'sweetalert2';
 })
 export class ProductPageComponent implements OnInit {
   products: any[] = [];
-  cartId: any;
-  currId: any;
 
   item = 12;
   p = 1;
 
-  constructor(private service: ProductsService) {}
+  constructor(private service: ProductsService, private router: Router) {}
 
   ngOnInit(): void {
-    this.currId = this.service.getCurrentUserId();
-    this.cartId = this.service.getUserCart();
     this.loadProducts();
   }
 
@@ -40,24 +37,7 @@ export class ProductPageComponent implements OnInit {
     });
   }
 
-  addtoCart(product_id: number, quantity: number) {
-    const data = {
-      user_id: this.currId,
-      cart_id: this.cartId,
-      product_id: product_id,
-      quantity: quantity,
-    };
-    this.service.addToCart(data).subscribe(
-      (response) => {
-     
-        console.log('Product added to cart', response);
-      },
-      (error) => {
-        console.error('Error adding product to cart', error);
-      }
-    );
+  viewProduct(id: any) {
+    this.router.navigate([`user/product-detail/${id}`]);
   }
-}
-function a(a: any, b: any): number {
-  throw new Error('Function not implemented.');
 }

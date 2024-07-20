@@ -68,6 +68,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($post->createOrder($data));
                 break;
 
+            case 'buynow':
+                echo json_encode($post->buyNow($data));
+                break;
+
             default:
                 echo "This is forbidden";
                 http_response_code(403);
@@ -83,6 +87,22 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo json_encode($get->getAllProducts($request[1]));
                 } else {
                     echo json_encode($get->getAllProducts());
+                }
+                break;
+
+            case 'carts':
+                if (isset($request[1])) {
+                    echo json_encode($get->getCart($request[1]));
+                } else {
+                    echo json_encode($get->getCart());
+                }
+                break;
+
+            case 'cartitems':
+                if (isset($request[1])) {
+                    echo json_encode($get->getCartItems($request[1]));
+                } else {
+                    echo ("No id provided");
                 }
                 break;
 

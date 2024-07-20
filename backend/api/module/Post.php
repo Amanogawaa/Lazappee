@@ -22,7 +22,6 @@ class Post extends GlobalMethods
             $stmt->execute(['user_id' => $user['id']]);
             $cart = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // If no cart exists, create one
             if (!$cart) {
                 $sql = "INSERT INTO user_carts (user_id) VALUES (:user_id)";
                 $stmt = $this->pdo->prepare($sql);
@@ -109,7 +108,6 @@ class Post extends GlobalMethods
     }
 
     public function  addProduct($data)
-
     {
         $sql = "INSERT INTO products (name, price, description, stock) 
                 VALUES (?, ?, ?, ?)";
@@ -135,6 +133,7 @@ class Post extends GlobalMethods
     }
 
 
+    //function for user cart
     public function addProductToCart($data)
     {
         try {
@@ -293,6 +292,77 @@ class Post extends GlobalMethods
             $this->pdo->commit();
 
             return $this->sendPayload(null, 'success', 'Order created successfully.', 200);
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log("Database error: " . $e->getMessage());
+            return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
+        }
+    }
+
+    //function for buy now
+    public function buyNow($data)
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // Fetch user details
+            $user_id = $data->user_id;
+
+            // Fetch product details
+            $sql = "SELECT price, stock FROM products WHERE id = :product_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(['product_id' => $data->product_id]);
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($product) {
+                $price = $product['price'];
+                $stock = $product['stock'];
+
+                // Check if sufficient stock is available
+                if ($data->quantity > $stock) {
+                    $this->pdo->rollBack();
+                    return $this->sendPayload(null, 'failed', "Not enough stock available.", 400);
+                }
+
+                // Deduct stock
+                $newStock = $stock - $data->quantity;
+                $sql = "UPDATE products SET stock = :stock WHERE id = :product_id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    'stock' => $newStock,
+                    'product_id' => $data->product_id
+                ]);
+
+                // Calculate total price
+                $totalPrice = $price * $data->quantity;
+
+                // Create a new order
+                $sql = "INSERT INTO user_orders (user_id, total_price) VALUES (:user_id, :total_price)";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    'user_id' => $user_id,
+                    'total_price' => $totalPrice
+                ]);
+
+                // Get the newly created order ID
+                $orderId = $this->pdo->lastInsertId();
+
+                // Insert order item
+                $sql = "INSERT INTO user_order_items (order_id, product_id, quantity, price) VALUES (:order_id, :product_id, :quantity, :price)";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    'order_id' => $orderId,
+                    'product_id' => $data->product_id,
+                    'quantity' => $data->quantity,
+                    'price' => $price
+                ]);
+
+                $this->pdo->commit();
+                return $this->sendPayload(null, 'success', "Purchase successful.", 200);
+            } else {
+                $this->pdo->rollBack();
+                return $this->sendPayload(null, 'failed', "Product not found.", 404);
+            }
         } catch (PDOException $e) {
             $this->pdo->rollBack();
             error_log("Database error: " . $e->getMessage());
