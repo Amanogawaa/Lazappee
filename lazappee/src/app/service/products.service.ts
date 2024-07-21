@@ -20,6 +20,14 @@ export class ProductsService {
     return this.http.post(`${this.API_URL}adduser`, data);
   }
 
+  addToCart(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}addtocart`, data);
+  }
+
+  buyNow(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}buynow`, data);
+  }
+
   //get
   getCurrentUserId(): number | null {
     const mytoken = sessionStorage.getItem('token');
@@ -51,11 +59,7 @@ export class ProductsService {
     }
   }
 
-  addToCart(data: any): Observable<any> {
-    return this.http.post<any>(`${this.API_URL}addtocart`, data);
-  }
-
-  buyNow(data: any): Observable<any> {
-    return this.http.post<any>(`${this.API_URL}buynow`, data);
+  getUserItems(id: any): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}cartitems/${id}`);
   }
 }

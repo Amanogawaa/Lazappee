@@ -16,7 +16,8 @@ export class ProductDetailsComponent implements OnInit {
   cartId: any;
   currId: any;
   productId: any;
-  quantity = 1;
+  quantity = 0;
+  totalPrice = 0;
 
   constructor(
     private service: ProductsService,
@@ -32,12 +33,19 @@ export class ProductDetailsComponent implements OnInit {
       console.log(this.currId);
       this.loadProduct(this.productId);
     });
+
+    const savedQuantity = localStorage.getItem(
+      `product-id-${this.currId}-${this.productId}`
+    );
+    if (savedQuantity) {
+      this.quantity = parseInt(savedQuantity, 10);
+    }
   }
 
   loadProduct(id: any) {
     this.service.getAllProducts(id).subscribe((res) => {
       this.product = res[0];
-      console.log(this.product);
+      this.totalItemPrice();
     });
   }
 
@@ -48,30 +56,41 @@ export class ProductDetailsComponent implements OnInit {
       product_id: this.productId,
       quantity: quantity,
     };
-    this.service.addToCart(data).subscribe(
-      (response) => {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
+    Swal.fire({
+      title: 'Add this to cart?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.service.addToCart(data).subscribe(
+          (response) => {
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              },
+            });
+            Toast.fire({
+              icon: 'success',
+              title: 'Item added to cart',
+            });
+            this.quantity++;
+            console.log(this.quantity);
           },
-        });
-        Toast.fire({
-          icon: 'success',
-          title: 'Product added to cart',
-        });
-        this.quantity++;
-        console.log(this.quantity);
-      },
-      (error) => {
-        console.error('Error adding product to cart', error);
+          (error) => {
+            console.error('Error adding product to cart', error);
+          }
+        );
       }
-    );
+    });
   }
 
   buyNow(quantity: number) {
@@ -80,38 +99,68 @@ export class ProductDetailsComponent implements OnInit {
       product_id: this.productId,
       quantity: quantity,
     };
-    this.service.buyNow(data).subscribe(
-      (response) => {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
+    Swal.fire({
+      title: 'Are you sure you want to purchase this item?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, buy it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.service.buyNow(data).subscribe(
+          (response) => {
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              },
+            });
+            Toast.fire({
+              title: 'Order placed!',
+              icon: 'success',
+            });
+            localStorage.removeItem(
+              `product-id-${this.currId}-${this.productId}`
+            );
+            this.quantity = 1;
           },
-        });
-        Toast.fire({
-          icon: 'success',
-          title: 'Purchase successful',
-        });
-        console.log(response);
-      },
-      (error) => {
-        console.error('Error during purchase', error);
+          (error) => {
+            console.error('Error during purchase', error);
+          }
+        );
       }
-    );
+    });
   }
 
   incrementQuantity() {
-    this.quantity++;
+    if (this.quantity <= this.product.stock) this.quantity++;
+    this.totalItemPrice();
+    this.saveQuantity();
   }
 
   decrementQuantity() {
-    if (this.quantity > 1) {
+    if (this.quantity > 0) {
       this.quantity--;
     }
+    this.totalItemPrice();
+    this.saveQuantity();
+  }
+
+  saveQuantity() {
+    localStorage.setItem(
+      `product-id-${this.currId}-${this.productId}`,
+      this.quantity.toString()
+    );
+  }
+
+  totalItemPrice() {
+    this.totalPrice = this.product.price;
+    this.totalPrice = Math.round(this.quantity * this.product.price);
   }
 }

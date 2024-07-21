@@ -114,4 +114,46 @@ class Get extends GlobalMethods
             return $this->sendPayload(null, 'failed', "Failed to retrieve cart items.", $result['code']);
         }
     }
+
+    public function getUserCartWithItems($userId)
+    {
+        // Retrieve the user's cart
+        $conditions = "user_id = '$userId'";
+        $result = $this->get_records('user_carts', $conditions);
+
+        if ($result['status']['remarks'] === 'success' && !empty($result['payload'])) {
+            // Accessing the first cart from the result payload
+            $cart = $result['payload'][0];  // Assuming there's only one cart for the user
+
+            $cartId = $cart['id'];  // Accessing the cart ID
+
+            // Retrieve the items within the cart
+            $query = "
+            SELECT 
+                user_cart_items.id AS item_id,
+                user_cart_items.product_id,
+                user_cart_items.price,
+                user_cart_items.created_at AS item_created_at,
+                user_cart_items.quantity,
+                user_carts.created_at AS cart_created_at,
+                products.description AS product_description
+            FROM user_cart_items
+            JOIN user_carts ON user_cart_items.cart_id = user_carts.id
+            JOIN products ON user_cart_items.product_id = products.id
+            WHERE user_carts.id = '$cartId'
+        ";
+
+            $itemsResult = $this->executeQuery($query);
+
+            if ($itemsResult['code'] == 200) {
+                // Combine cart details and items
+                $cart['items'] = $itemsResult['data'];
+                return $this->sendPayload($cart, 'success', "Successfully retrieved cart and items.", $itemsResult['code']);
+            } else {
+                return $this->sendPayload(null, 'failed', "Failed to retrieve cart items.", $itemsResult['code']);
+            }
+        } else {
+            return $this->sendPayload(null, 'failed', "Failed to retrieve cart details.", $result['status']['code']);
+        }
+    }
 }

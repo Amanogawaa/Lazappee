@@ -83,6 +83,7 @@
 
         <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
           <button
+            (click)="addtoCart(quantity)"
             class="text-white mt-4 sm:mt-0 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 flex items-center justify-center"
             role="button"
           >
@@ -133,11 +134,62 @@
           </button>
         </div>
 
-        <hr class="my-6 md:my-8 border-gray-200 dark:border-gray-800" />
-
-        <p class="mb-6 text-gray-500 dark:text-gray-400">
+        <p class="mt-6 text-gray-500 dark:text-gray-400">
           {{ product.description }}
         </p>
+
+        <hr class="my-4 border-gray-200 dark:border-gray-800" />
+
+        <div class="mx-auto flex-1 w-full">
+          <div
+            class="rounded-lg bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:p-6"
+          >
+            <p class="text-xl font-semibold text-gray-900 dark:text-white">
+              Order summary
+            </p>
+
+            <div class="space-y-4">
+              <div class="space-y-2">
+                <dl class="flex items-center justify-between gap-4">
+                  <dt
+                    class="text-base font-normal text-gray-500 dark:text-gray-400"
+                  >
+                    Item Price
+                  </dt>
+                  <dd
+                    class="text-base font-medium text-gray-900 dark:text-white"
+                  >
+                    ₱ {{ product.price }}
+                  </dd>
+                </dl>
+
+                <dl class="flex items-center justify-between gap-4">
+                  <dt
+                    class="text-base font-normal text-gray-500 dark:text-gray-400"
+                  >
+                    Item Quanity
+                  </dt>
+                  <dd
+                    class="text-base font-medium text-gray-900 dark:text-white"
+                  >
+                    {{ quantity }}x
+                  </dd>
+                </dl>
+              </div>
+
+              <dl
+                class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700"
+              >
+                <dt class="text-base font-bold text-gray-900 dark:text-white">
+                  Total
+                </dt>
+                <dd class="text-base font-bold text-gray-900 dark:text-white">
+                  ₱ {{ totalPrice }}
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

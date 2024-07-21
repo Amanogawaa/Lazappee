@@ -98,9 +98,17 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 break;
 
+                // case 'cartitems':
+                //     if (isset($request[1])) {
+                //         echo json_encode($get->getCartItems($request[1]));
+                //     } else {
+                //         echo ("No id provided");
+                //     }
+                //     break;
+
             case 'cartitems':
                 if (isset($request[1])) {
-                    echo json_encode($get->getCartItems($request[1]));
+                    echo json_encode($get->getUserCartWithItems($request[1]));
                 } else {
                     echo ("No id provided");
                 }
