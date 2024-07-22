@@ -4,6 +4,9 @@ import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
 import Swal from 'sweetalert2';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Observable, of, switchMap } from 'rxjs';
+import { Product } from '../../product';
 
 @Component({
   selector: 'app-product-page',
@@ -13,21 +16,40 @@ import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
   styleUrl: './product-page.component.css',
 })
 export class ProductPageComponent implements OnInit {
-  products: any[] = [];
-
+  products: Product[] = [];
   item = 12;
   p = 1;
 
-  constructor(private service: ProductsService, private router: Router) {}
+  constructor(
+    private service: ProductsService,
+    private router: Router,
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
   }
 
   loadProducts() {
-    this.service.getAllProducts().subscribe((res) => {
-      this.products = res;
-      this.sortStock();
+    this.service.getAllProducts().subscribe({
+      next: (result: any) => {
+        console.log(result);
+        if (result && Array.isArray(result)) {
+          this.products = result.map((item) => ({
+            ...item,
+            product_image$: this.service.getProductImage(item.id).pipe(
+              switchMap((imageResult) => {
+                if (imageResult.size > 0) {
+                  const url = URL.createObjectURL(imageResult);
+                  return of(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+                } else {
+                  return of(undefined);
+                }
+              })
+            ),
+          }));
+        }
+      },
     });
   }
 

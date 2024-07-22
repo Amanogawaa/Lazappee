@@ -19,13 +19,10 @@ require_once "./config/database.php";
 require_once __DIR__ . '/bootstrap.php';
 require_once "./src/Jwt.php";
 
-
 $con = new Connection();
 $pdo = $con->connect();
 $post = new Post($pdo);
 $get = new Get($pdo);
-
-
 
 if (isset($_REQUEST['request'])) {
     $request = explode('/', $_REQUEST['request']);
@@ -60,8 +57,16 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($post->addProduct($data));
                 break;
 
+            case 'uploadimage':
+                echo json_encode($post->uploadImage($request[1]));
+                break;
+
             case 'addtocart':
                 echo json_encode($post->addProductToCart($data));
+                break;
+
+            case 'removetocart':
+                echo json_encode($post->removeItemFromCart($data));
                 break;
 
             case 'orderitem':
@@ -70,6 +75,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
             case 'buynow':
                 echo json_encode($post->buyNow($data));
+                break;
+
+            case 'cancelorder':
+                echo json_encode($post->cancelOrder($data));
                 break;
 
             default:
@@ -111,6 +120,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo json_encode($get->getUserCartWithItems($request[1]));
                 } else {
                     echo ("No id provided");
+                }
+                break;
+
+            case 'orderitems':
+                if (isset($request[1])) {
+                    echo json_encode($get->getAllUserOrders($request[1]));
+                } else {
+                    echo ("No id provided");
+                }
+                break;
+
+            case 'getproductimage':
+                if (isset($request[1])) {
+                    $get->getProductImage($request[1]);
+                } else {
+                    echo "ID not provided";
+                    http_response_code(400);
                 }
                 break;
 

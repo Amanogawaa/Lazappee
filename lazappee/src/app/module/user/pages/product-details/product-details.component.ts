@@ -3,6 +3,9 @@ import { ProductsService } from '../../../../service/products.service';
 import { ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer } from '@angular/platform-browser';
+import { switchMap, of } from 'rxjs';
+import { Product } from '../../product';
 
 @Component({
   selector: 'app-product-details',
@@ -12,7 +15,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './product-details.component.css',
 })
 export class ProductDetailsComponent implements OnInit {
-  product: any;
+  product: Product[] = [];
   cartId: any;
   currId: any;
   productId: any;
@@ -21,7 +24,8 @@ export class ProductDetailsComponent implements OnInit {
 
   constructor(
     private service: ProductsService,
-    private router: ActivatedRoute
+    private router: ActivatedRoute,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -43,9 +47,25 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   loadProduct(id: any) {
-    this.service.getAllProducts(id).subscribe((res) => {
-      this.product = res[0];
-      this.totalItemPrice();
+    this.service.getAllProducts(id).subscribe({
+      next: (result: any) => {
+        if (result && Array.isArray(result)) {
+          this.product = result.map((item) => ({
+            ...item,
+            product_image$: this.service.getProductImage(item.id).pipe(
+              switchMap((imageResult) => {
+                if (imageResult.size > 0) {
+                  const url = URL.createObjectURL(imageResult);
+                  return of(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+                } else {
+                  return of(undefined);
+                }
+              })
+            ),
+          }));
+        }
+        this.totalItemPrice();
+      },
     });
   }
 
@@ -82,7 +102,7 @@ export class ProductDetailsComponent implements OnInit {
               icon: 'success',
               title: 'Item added to cart',
             });
-            this.quantity++;
+            this.saveQuantity();
             console.log(this.quantity);
           },
           (error) => {
@@ -128,7 +148,7 @@ export class ProductDetailsComponent implements OnInit {
             localStorage.removeItem(
               `product-id-${this.currId}-${this.productId}`
             );
-            this.quantity = 1;
+            this.quantity = 0;
           },
           (error) => {
             console.error('Error during purchase', error);
@@ -139,9 +159,10 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   incrementQuantity() {
-    if (this.quantity <= this.product.stock) this.quantity++;
+    if (this.quantity < this.product[0].stock) {
+      this.quantity++;
+    }
     this.totalItemPrice();
-    this.saveQuantity();
   }
 
   decrementQuantity() {
@@ -149,7 +170,6 @@ export class ProductDetailsComponent implements OnInit {
       this.quantity--;
     }
     this.totalItemPrice();
-    this.saveQuantity();
   }
 
   saveQuantity() {
@@ -160,7 +180,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   totalItemPrice() {
-    this.totalPrice = this.product.price;
-    this.totalPrice = Math.round(this.quantity * this.product.price);
+    this.totalPrice = this.product[0].price;
+    this.totalPrice = Math.round(this.quantity * this.product[0].price);
   }
 }

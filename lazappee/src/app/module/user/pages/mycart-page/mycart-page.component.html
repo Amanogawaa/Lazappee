@@ -1,23 +1,156 @@
-<section class="bg-white mt-16 py-8 antialiased dark:bg-gray-900 md:py-16">
-  <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
-    <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-      My Cart
-    </h2>
+<section class="bg-white mt-5 py-8 antialiased dark:bg-gray-900 md:py-16">
+  <div class="flex justify-center w-full px-4">
+    <div class="font-sans w-[80%] p-4">
+      <h1 class="text-2xl font-extrabold text-gray-800">My Cart</h1>
+      <div class="grid md:grid-cols-2 gap-4 mt-8">
+        <div class="md:col-span-2 space-y-4" *ngFor="let item of items">
+          <div
+            class="flex gap-4 bg-white px-4 py-6 rounded-md border border-slate-500"
+          >
+            <div class="flex gap-4">
+              <div class="w-28 h-28 max-sm:w-24 max-sm:h-24 shrink-0">
+                <img
+                  *ngIf="item.product_image$ | async as itemImage"
+                  [src]="itemImage"
+                  loading="lazy"
+                  class="w-full h-full object-contain"
+                />
+              </div>
 
-    <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
-      <div class="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
-        <div class="space-y-6">
+              <div class="flex flex-col gap-4">
+                <div class="space-y-2">
+                  <h3 class="text-lg font-bold text-gray-800">
+                    {{ item.product_name }}
+                  </h3>
+                  <p
+                    class="text-sm font-semibold text-gray-500 mt-2 flex items-center gap-2"
+                  >
+                    <span> {{ item.product_description }}</span>
+                  </p>
+                  <h3 class="text-sm font-bold text-gray-800 mt-auto">
+                    Price:₱{{ item.price }}
+                  </h3>
+                </div>
+
+                <div class="mt-auto flex items-center gap-3">
+                  <button
+                    type="button"
+                    id="decrement-button"
+                    (click)="decrementQuantity(item)"
+                    class="flex items-center justify-center w-5 h-5 bg-gray-400 outline-none rounded-full"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-2 fill-white"
+                      viewBox="0 0 124 124"
+                    >
+                      <path
+                        d="M112 50H12C5.4 50 0 55.4 0 62s5.4 12 12 12h100c6.6 0 12-5.4 12-12s-5.4-12-12-12z"
+                        data-original="#000000"
+                      ></path>
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    id="counter-input"
+                    placeholder=""
+                    [value]="item.quantity"
+                    readonly
+                    data-input-counter
+                    class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    id="increment-button"
+                    (click)="incrementQuantity(item)"
+                    data-input-counter-increment="counter-input"
+                    class="flex items-center justify-center w-5 h-5 bg-gray-400 outline-none rounded-full"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-2 fill-white"
+                      viewBox="0 0 42 42"
+                    >
+                      <path
+                        d="M37.059 16H26V4.941C26 2.224 23.718 0 21 0s-5 2.224-5 4.941V16H4.941C2.224 16 0 18.282 0 21s2.224 5 4.941 5H16v11.059C16 39.776 18.282 42 21 42s5-2.224 5-4.941V26h11.059C39.776 26 42 23.718 42 21s-2.224-5-4.941-5z"
+                        data-original="#000000"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ml-auto flex flex-col justify-between">
+              <div class="flex items-start gap-4 justify-end">
+                <button type="button" (click)="removeToCart(item.product_id)">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-4 cursor-pointer fill-red-500 inline-block"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M19 7a1 1 0 0 0-1 1v11.191A1.92 1.92 0 0 1 15.99 21H8.01A1.92 1.92 0 0 1 6 19.191V8a1 1 0 0 0-2 0v11.191A3.918 3.918 0 0 0 8.01 23h7.98A3.918 3.918 0 0 0 20 19.191V8a1 1 0 0 0-1-1Zm1-3h-4V2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H4a1 1 0 0 0 0 2h16a1 1 0 0 0 0-2ZM10 4V3h4v1Z"
+                      data-original="#000000"
+                    ></path>
+                    <path
+                      d="M11 17v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Zm4 0v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Z"
+                      data-original="#000000"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <button
+                (click)="placeOrder(item.product_id, item.quantity)"
+                class="text-white mt-auto sm:mt-0 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 flex items-center justify-center whitespace-nowrap"
+                role="button"
+              >
+                <svg
+                  class="w-5 h-5 -ms-2 me-2"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
+                  />
+                </svg>
+
+                Buy now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
+      <div class="mx-auto w-full flex-none">
+        <div class="space-y-6" *ngIf="items.length !== 0">
           <div
             *ngFor="let item of items"
             class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6"
           >
             <div
-              class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0"
+              class="space-y-4 max-h-52 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0"
             >
-              <a href="#" class="shrink-0 md:order-1">
-                <img class="h-20 w-20 dark:hidden" alt="imac image" />
-                <img class="hidden h-20 w-20 dark:block" alt="imac image" />
-              </a>
+              <div
+                class="justify-between max-h-52 h-fit mb-6 rounded-lg bg-white p-6 shadow-md sm:flex sm:justify-start"
+              >
+                <img
+                  class="h-fit w-full object-cover object-center"
+                  *ngIf="item.product_image$ | async as itemImage"
+                  [src]="itemImage"
+                  loading="lazy"
+                />
+              </div>
 
               <div
                 class="flex items-center justify-between md:order-3 md:justify-end"
@@ -26,7 +159,7 @@
                   <button
                     type="button"
                     id="decrement-button"
-                    (click)="decrementQuantity()"
+                    (click)="decrementQuantity(item)"
                     data-input-counter-decrement="counter-input"
                     class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
                   >
@@ -52,13 +185,13 @@
                     data-input-counter
                     class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
                     placeholder=""
-                    [value]="quantity"
+                    [value]="item.quantity"
                     readonly
                   />
                   <button
                     type="button"
                     id="increment-button"
-                    (click)="incrementQuantity()"
+                    (click)="incrementQuantity(item)"
                     data-input-counter-increment="counter-input"
                     class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
                   >
@@ -82,7 +215,7 @@
 
                 <div class="text-end md:order-4 md:w-32">
                   <p class="text-base font-bold text-gray-900 dark:text-white">
-                    ₱{{ item.price }}
+                    Price: ₱{{ item.price }}
                   </p>
                 </div>
               </div>
@@ -90,15 +223,20 @@
               <div
                 class="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md"
               >
-                <a
-                  href="#"
+                <h2
+                  class="text-xl font-medium text-gray-900 hover:underline dark:text-white"
+                >
+                  {{ item.product_name }}
+                </h2>
+                <span
                   class="text-base font-medium text-gray-900 hover:underline dark:text-white"
-                  >{{ item.product_description }}</a
+                  >{{ item.product_description }}</span
                 >
 
                 <div class="flex items-center gap-4">
                   <button
                     type="button"
+                    (click)="removeToCart(item.product_id)"
                     class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500"
                   >
                     <svg
@@ -120,94 +258,50 @@
                     </svg>
                     Remove
                   </button>
+                  <button
+                    (click)="placeOrder(item.product_id, item.quantity)"
+                    class="text-white mt-4 sm:mt-0 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 flex items-center justify-center"
+                    role="button"
+                  >
+                    <svg
+                      class="w-5 h-5 -ms-2 me-2"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
+                      />
+                    </svg>
+
+                    Buy now
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- summary -->
-      <div class="mx-auto mt-6 max-w-4xl flex-1 space-y-6 lg:mt-0 lg:w-full">
-        <div
-          class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6"
-        >
-          <p class="text-xl font-semibold text-gray-900 dark:text-white">
-            Cart Summary
-          </p>
-
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <dl class="flex items-center justify-between gap-4">
-                <dt
-                  class="text-base font-normal text-gray-500 dark:text-gray-400"
-                >
-                  Item price
-                </dt>
-                <dd class="text-base font-medium text-gray-900 dark:text-white">
-                  $7,592.00
-                </dd>
-              </dl>
-
-              <dl class="flex items-center justify-between gap-4">
-                <dt
-                  class="text-base font-normal text-gray-500 dark:text-gray-400"
-                >
-                  Item quantity
-                </dt>
-                <dd class="text-base font-medium text-gray-900 dark:text-white">
-                  $799
-                </dd>
-              </dl>
-            </div>
-
-            <dl
-              class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700"
-            >
-              <dt class="text-base font-bold text-gray-900 dark:text-white">
-                Total
-              </dt>
-              <dd class="text-base font-bold text-gray-900 dark:text-white">
-                $8,191.00
-              </dd>
-            </dl>
-          </div>
-
-          <button
-            href="#"
-            class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+        <section *ngIf="items.length === 0">
+          <div
+            class="py-4 px-4 mx-auto max-w-screen-xl h-full lg:py-16 lg:px-6"
           >
-            Place Order
-          </button>
-
-          <div class="flex items-center justify-center gap-2">
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-              or
-            </span>
-            <button
-              routerLink="/user/product-page"
-              class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 underline hover:no-underline dark:text-primary-500"
-            >
-              Continue Shopping
-              <svg
-                class="h-5 w-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 12H5m14 0-4 4m4-4-4-4"
-                />
-              </svg>
-            </button>
+            <div class="max-w-screen-sm text-center mx-auto">
+              <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
+              <h1 class="text-gray-500 text-xl block">No Items Found</h1>
+              <p class="text-gray-500 text-xl">
+                It looks like your cart is empty.
+              </p>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </div> -->
   </div>
 </section>

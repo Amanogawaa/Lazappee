@@ -24,8 +24,20 @@ export class ProductsService {
     return this.http.post<any>(`${this.API_URL}addtocart`, data);
   }
 
+  removeToCart(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}removetocart`, data);
+  }
+
   buyNow(data: any): Observable<any> {
     return this.http.post<any>(`${this.API_URL}buynow`, data);
+  }
+
+  orderItem(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}orderitem`, data);
+  }
+
+  cancelOrderItem(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}cancelorder`, data);
   }
 
   //get
@@ -61,5 +73,15 @@ export class ProductsService {
 
   getUserItems(id: any): Observable<any> {
     return this.http.get<any>(`${this.API_URL}cartitems/${id}`);
+  }
+
+  getUserOrderItems(id: any): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}orderitems/${id}`);
+  }
+
+  getProductImage(id: number): Observable<any> {
+    return this.http.get(`${this.API_URL}getproductimage/${id}`, {
+      responseType: 'blob',
+    });
   }
 }

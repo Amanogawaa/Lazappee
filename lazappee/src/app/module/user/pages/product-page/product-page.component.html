@@ -12,31 +12,25 @@
 
     <div
       class="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4"
+      *ngIf="products.length !== 0"
     >
       <div
         (click)="viewProduct(item.id)"
-        class="rounded-lg border border-slate-700 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        class="rounded-lg border cursor-pointer border-slate-700 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
         *ngFor="
           let item of products
             | paginate : { itemsPerPage: item, currentPage: p }
         "
       >
-        <div class="h-56 w-full">
-          @defer (on viewport) {
-          <a href="#">
-            <img class="mx-auto h-full dark:hidden" src="" alt="" />
-            <img class="mx-auto hidden h-full dark:block" src="" alt="" />
-          </a>
-          } @placeholder {
+        <div class="h-56 w-full border-b border-gray-400">
           <img
-            class="mx-auto hidden h-full dark:block"
-            src=""
-            alt=""
+            class="mx-auto h-full w-full rounded-t-md"
+            *ngIf="item.product_image$ | async as itemImage"
+            [src]="itemImage"
             loading="lazy"
           />
-          }
         </div>
-        <div class="pt-6">
+        <div class="p-6 pt-2">
           <a
             class="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
             >{{ item.name }}</a
@@ -63,9 +57,11 @@
             </p>
           </div>
         </div>
+        <!-- 
+         -->
       </div>
     </div>
-    <div class="w-full text-center">
+    <div class="w-full text-center" *ngIf="products.length !== 0">
       <pagination-controls
         (pageChange)="p = $event"
         [responsive]="true"
@@ -73,5 +69,15 @@
       >
       </pagination-controls>
     </div>
+
+    <section *ngIf="products.length === 0">
+      <div class="py-4 px-4 mx-auto max-w-screen-xl h-full lg:py-16 lg:px-6">
+        <div class="max-w-screen-sm text-center mx-auto">
+          <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
+          <h1 class="text-gray-500 text-xl block">No Items Found</h1>
+          <p class="text-gray-500 text-xl">It looks like your cart is empty.</p>
+        </div>
+      </div>
+    </section>
   </div>
 </section>

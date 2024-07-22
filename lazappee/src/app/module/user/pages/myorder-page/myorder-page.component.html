@@ -7,12 +7,22 @@
         >
           My orders
         </h2>
+        <p
+          class="text-base font-medium text-gray-500 dark:text-gray-400 cursor-pointer"
+          routerLink="/user/mysummary-page"
+        >
+          View Summary
+        </p>
       </div>
 
       <div class="mt-6 flow-root sm:mt-8">
-        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div
+          class="divide-y divide-gray-200 dark:divide-gray-700"
+          *ngIf="items !== null"
+        >
           <div
             class="flex flex-wrap items-center gap-y-4 py-6 border-b border-gray-300"
+            *ngFor="let item of items"
           >
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt
@@ -23,7 +33,7 @@
               <dd
                 class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
               >
-                <a href="#" class="hover:underline">#FWB127364372</a>
+                <a class="hover:underline">{{ item.items[0].product_name }}</a>
               </dd>
             </dl>
 
@@ -36,7 +46,7 @@
               <dd
                 class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
               >
-                20.12.2023
+                {{ item.order_created_at | date : "longDate" }}
               </dd>
             </dl>
 
@@ -49,14 +59,41 @@
               <dd
                 class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
               >
-                $4,756
+                ₱ {{ item.items[0].price }}
+              </dd>
+            </dl>
+
+            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+              <dt
+                class="text-base font-medium text-gray-500 dark:text-gray-400"
+              >
+                Quantity:
+              </dt>
+              <dd
+                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
+              >
+                {{ item.items[0].quantity }}
+              </dd>
+            </dl>
+
+            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+              <dt
+                class="text-base font-medium text-gray-500 dark:text-gray-400"
+              >
+                Total Price:
+              </dt>
+              <dd
+                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
+              >
+                ₱ {{ item.total_price }}
               </dd>
             </dl>
 
             <div
-              class="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4"
+              class="w-full flex lg:w-64 lg:items-center lg:justify-end gap-4"
             >
               <button
+                (click)="cancelOrder(item.order_id)"
                 type="button"
                 class="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
               >
@@ -66,6 +103,15 @@
           </div>
         </div>
       </div>
+      <section *ngIf="items === null">
+        <div class="py-4 px-4 mx-auto max-w-screen-xl h-full lg:py-16 lg:px-6">
+          <div class="max-w-screen-sm text-center mx-auto">
+            <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
+            <h1 class="text-gray-500 text-xl block">No Items Found</h1>
+            <p class="text-gray-500 text-xl">You dont have any order yet.</p>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </section>
