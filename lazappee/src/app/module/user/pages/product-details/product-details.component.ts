@@ -2,15 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { ProductsService } from '../../../../service/products.service';
 import { ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { switchMap, of } from 'rxjs';
 import { Product } from '../../product';
+import { FormatterPipe } from '../../../../pipe/formatter.pipe';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormatterPipe],
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.css',
 })
@@ -19,13 +20,14 @@ export class ProductDetailsComponent implements OnInit {
   cartId: any;
   currId: any;
   productId: any;
-  quantity = 0;
+  quantity = 1;
   totalPrice = 0;
 
   constructor(
     private service: ProductsService,
     private router: ActivatedRoute,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -33,8 +35,6 @@ export class ProductDetailsComponent implements OnInit {
     this.cartId = this.service.getUserCart();
     this.router.params.subscribe((param) => {
       this.productId = +param['id'];
-      console.log(this.productId);
-      console.log(this.currId);
       this.loadProduct(this.productId);
     });
 
@@ -47,10 +47,10 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   loadProduct(id: any) {
-    this.service.getAllProducts(id).subscribe({
+    this.service.getAllProducts(null, id).subscribe({
       next: (result: any) => {
-        if (result && Array.isArray(result)) {
-          this.product = result.map((item) => ({
+        if (result.payload && Array.isArray(result.payload)) {
+          this.product = result.payload.map((item: any) => ({
             ...item,
             product_image$: this.service.getProductImage(item.id).pipe(
               switchMap((imageResult) => {
@@ -182,5 +182,9 @@ export class ProductDetailsComponent implements OnInit {
   totalItemPrice() {
     this.totalPrice = this.product[0].price;
     this.totalPrice = Math.round(this.quantity * this.product[0].price);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

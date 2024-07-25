@@ -107,31 +107,72 @@ class Post extends GlobalMethods
         }
     }
 
-    public function  addProduct($data)
+    public function addProduct($data)
     {
-        $sql = "INSERT INTO products (name, price, description, stock, image) 
-                VALUES (?, ?, ?, ?, ?)";
+        if (!isset($data->name, $data->price, $data->description, $data->stock, $data->categories)) {
+            return $this->sendPayload(null, 'failed', "Invalid input data.", 400);
+        }
+
+        // Start the transaction
+        $this->pdo->beginTransaction();
+
+        $sql = "INSERT INTO products (name, price, description, stock) VALUES (?, ?, ?, ?)";
         try {
+            // Insert the product
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 $data->name,
                 $data->price,
                 $data->description,
                 $data->stock,
-                $data->image
             ]);
 
-
             if ($stmt->rowCount() > 0) {
+                $productId = $this->pdo->lastInsertId();
+
+                // Validate and get category IDs
+                $validCategories = $this->getValidCategoryIds($data->categories);
+
+                // SQL to insert into the product_category table
+                $sqlProductCategory = "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)";
+                $stmtProductCategory = $this->pdo->prepare($sqlProductCategory);
+
+                // Insert the product-category relationships
+                foreach ($validCategories as $categoryId) {
+                    $stmtProductCategory->execute([$productId, $categoryId]);
+                }
+
+                // Commit the transaction
+                $this->pdo->commit();
+
                 return $this->sendPayload(null, 'success', "Record added successfully.", 200);
             } else {
+                // Roll back the transaction if no rows were affected
+                $this->pdo->rollBack();
                 return $this->sendPayload(null, 'failed', "Failed to add record.", 500);
             }
         } catch (PDOException $e) {
+            // Roll back the transaction in case of an error
+            $this->pdo->rollBack();
             error_log("Database error: " . $e->getMessage());
             return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
         }
     }
+
+    private function getValidCategoryIds($categoryNames)
+    {
+        $placeholders = rtrim(str_repeat('?, ', count($categoryNames)), ', ');
+        $sql = "SELECT id FROM categories WHERE name IN ($placeholders)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($categoryNames);
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $validCategoryIds = array_column($results, 'id');
+
+        return $validCategoryIds;
+    }
+
+
 
     public function uploadImage($id)
     {
@@ -151,6 +192,63 @@ class Post extends GlobalMethods
             $code = 400;
         }
         return $this->sendPayload(null, "failed", $errmsg, $code);
+    }
+
+    public function updateProduct($data, $id)
+    {
+        $sql = "UPDATE products 
+                SET name = ?, price = ?, description = ?, stock = ?
+                WHERE id = ?";
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                $data->name,
+                $data->price,
+                $data->description,
+                $data->stock,
+                $id
+            ]);
+
+            if ($stmt->rowCount() > 0) {
+                return $this->sendPayload(null, 'success', "User updated successfully.", 200);
+            } else {
+                return $this->sendPayload(null, 'failed', "Failed to update user.", 500);
+            }
+        } catch (PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteProduct($id)
+    {
+        $verifyEventSql = "SELECT id FROM products WHERE id = ?";
+        $stmt = $this->pdo->prepare($verifyEventSql);
+        $stmt->execute([$id]);
+        if ($stmt->rowCount() == 0) {
+            return $this->sendPayload(null, 'failed', "Item does not exist.", 400);
+        }
+
+        $deleteEventSql = "DELETE FROM products WHERE id = ?";
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $stmt = $this->pdo->prepare($deleteEventSql);
+            $stmt->execute([$id]);
+
+            if ($stmt->rowCount() > 0) {
+                $this->pdo->commit();
+                return $this->sendPayload(null, 'success', "Item deleted successfully.", 200);
+            } else {
+                $this->pdo->rollBack();
+                return $this->sendPayload(null, 'failed', "Failed to delete event.", 500);
+            }
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log("Database error: " . $e->getMessage());
+            return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
+        }
     }
 
     //function for user cart
@@ -223,14 +321,7 @@ class Post extends GlobalMethods
                     ]);
                 }
 
-                // Update stock in products table
-                $newStock = $stock - $data->quantity;
-                $sql = "UPDATE products SET stock = :stock WHERE id = :product_id";
-                $stmt = $this->pdo->prepare($sql);
-                $stmt->execute([
-                    'stock' => $newStock,
-                    'product_id' => $data->product_id
-                ]);
+
 
                 if ($stmt->rowCount() > 0) {
                     $this->pdo->commit();
@@ -250,38 +341,107 @@ class Post extends GlobalMethods
         }
     }
 
+    // public function createOrder($data)
+    // {
+    //     if (empty($data->user_id) || empty($data->product_id) || empty($data->quantity) || empty($data->cart_id)) {
+    //         return $this->sendPayload(null, 'failed', 'User ID, product ID, quantity, and cart ID are required.', 400);
+    //     }
+
+    //     try {
+    //         $this->pdo->beginTransaction();
+
+    //         // Fetch the specific cart item including quantity
+    //         $sql = "SELECT ci.product_id, ci.price, ci.quantity, p.name
+    //         FROM user_cart_items ci
+    //         JOIN products p ON ci.product_id = p.id
+    //         WHERE ci.cart_id = :cart_id AND ci.product_id = :product_id";
+    //         $stmt = $this->pdo->prepare($sql);
+    //         $stmt->execute([
+    //             'cart_id' => $data->cart_id,
+    //             'product_id' => $data->product_id
+    //         ]);
+    //         $cartItem = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    //         if (empty($cartItem)) {
+    //             return $this->sendPayload(null, 'failed', 'Item not found in cart.', 404);
+    //         }
+
+    //         // Calculate total price for this item
+    //         $totalPrice = $cartItem['price'] * $data->quantity;
+
+    //         // Insert into user_orders
+    //         $sql = "INSERT INTO user_orders (user_id, total_price) VALUES (:user_id, :total_price)";
+    //         $stmt = $this->pdo->prepare($sql);
+    //         $stmt->execute([
+    //             'user_id' => $data->user_id,
+    //             'total_price' => $totalPrice
+    //         ]);
+
+    //         $orderId = $this->pdo->lastInsertId();
+
+    //         // Insert into user_order_items and update stock
+    //         $sql = "INSERT INTO user_order_items (order_id, product_id, quantity, price) 
+    //             VALUES (:order_id, :product_id, :quantity, :price)";
+    //         $orderItemStmt = $this->pdo->prepare($sql);
+    //         $updateStockStmt = $this->pdo->prepare("UPDATE products SET stock = stock - :quantity WHERE id = :product_id");
+
+    //         $orderItemStmt->execute([
+    //             'order_id' => $orderId,
+    //             'product_id' => $data->product_id,
+    //             'quantity' => $data->quantity,
+    //             'price' => $cartItem['price']
+    //         ]);
+
+    //         // Update stock in products table
+    //         $updateStockStmt->execute([
+    //             'quantity' => $data->quantity,
+    //             'product_id' => $data->product_id
+    //         ]);
+
+    //         $sql = "DELETE FROM user_cart_items WHERE cart_id = :cart_id AND product_id = :product_id";
+    //         $stmt = $this->pdo->prepare($sql);
+    //         $stmt->execute([
+    //             'cart_id' => $data->cart_id,
+    //             'product_id' => $data->product_id
+    //         ]);
+
+
+    //         $this->pdo->commit();
+
+    //         return $this->sendPayload(null, 'success', 'Order created successfully.', 200);
+    //     } catch (PDOException $e) {
+    //         $this->pdo->rollBack();
+    //         error_log("Database error: " . $e->getMessage());
+    //         return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
+    //     }
+    // }
+
     public function createOrder($data)
     {
-        if (empty($data->user_id) || empty($data->product_id) || empty($data->quantity) || empty($data->cart_id)) {
-            return $this->sendPayload(null, 'failed', 'User ID, product ID, quantity, and cart ID are required.', 400);
+        if (empty($data->user_id) || empty($data->cart_id)) {
+            return $this->sendPayload(null, 'failed', 'User ID and cart ID are required.', 400);
         }
 
         try {
             $this->pdo->beginTransaction();
 
-            // Fetch the specific cart item including quantity
+            // Fetch all cart items for the given cart ID
             $sql = "SELECT ci.product_id, ci.price, ci.quantity, p.name
-            FROM user_cart_items ci
-            JOIN products p ON ci.product_id = p.id
-            WHERE ci.cart_id = :cart_id AND ci.product_id = :product_id";
+                FROM user_cart_items ci
+                JOIN products p ON ci.product_id = p.id
+                WHERE ci.cart_id = :cart_id";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                'cart_id' => $data->cart_id,
-                'product_id' => $data->product_id
-            ]);
-            $cartItem = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute(['cart_id' => $data->cart_id]);
+            $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if (empty($cartItem)) {
-                return $this->sendPayload(null, 'failed', 'Item not found in cart.', 404);
+            if (empty($cartItems)) {
+                return $this->sendPayload(null, 'failed', 'No items found in cart.', 404);
             }
 
-            // Validate the requested quantity
-            if ($data->quantity > $cartItem['quantity']) {
-                return $this->sendPayload(null, 'failed', 'Requested quantity exceeds available quantity.', 400);
-            }
-
-            // Calculate total price for this item
-            $totalPrice = $cartItem['price'] * $data->quantity;
+            // Calculate total price for the order
+            $totalPrice = array_sum(array_map(function ($item) {
+                return $item['price'] * $item['quantity'];
+            }, $cartItems));
 
             // Insert into user_orders
             $sql = "INSERT INTO user_orders (user_id, total_price) VALUES (:user_id, :total_price)";
@@ -293,32 +453,32 @@ class Post extends GlobalMethods
 
             $orderId = $this->pdo->lastInsertId();
 
-            // Insert into user_order_items and update stock
-            $sql = "INSERT INTO user_order_items (order_id, product_id, quantity, price) 
-                VALUES (:order_id, :product_id, :quantity, :price)";
-            $orderItemStmt = $this->pdo->prepare($sql);
+            // Insert into user_order_items and update stock for each product
+            $orderItemSql = "INSERT INTO user_order_items (order_id, product_id, quantity, price) VALUES (:order_id, :product_id, :quantity, :price)";
+            $orderItemStmt = $this->pdo->prepare($orderItemSql);
+
             $updateStockStmt = $this->pdo->prepare("UPDATE products SET stock = stock - :quantity WHERE id = :product_id");
 
-            $orderItemStmt->execute([
-                'order_id' => $orderId,
-                'product_id' => $data->product_id,
-                'quantity' => $data->quantity,
-                'price' => $cartItem['price']
-            ]);
+            foreach ($cartItems as $item) {
+                // Insert each item into user_order_items
+                $orderItemStmt->execute([
+                    'order_id' => $orderId,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ]);
 
-            // Update stock in products table
-            $updateStockStmt->execute([
-                'quantity' => $data->quantity,
-                'product_id' => $data->product_id
-            ]);
+                // Update stock in products table
+                $updateStockStmt->execute([
+                    'quantity' => $item['quantity'],
+                    'product_id' => $item['product_id']
+                ]);
+            }
 
-            $sql = "DELETE FROM user_cart_items WHERE cart_id = :cart_id AND product_id = :product_id";
+            // Remove all items from the cart
+            $sql = "DELETE FROM user_cart_items WHERE cart_id = :cart_id";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                'cart_id' => $data->cart_id,
-                'product_id' => $data->product_id
-            ]);
-
+            $stmt->execute(['cart_id' => $data->cart_id]);
 
             $this->pdo->commit();
 
@@ -329,6 +489,7 @@ class Post extends GlobalMethods
             return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
         }
     }
+
 
     public function cancelOrder($data)
     {

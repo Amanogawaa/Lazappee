@@ -25,35 +25,95 @@ class Get extends GlobalMethods
         return $this->sendPayload(null, 'failed', "Failed to retrieve data.", $result['code']);
     }
 
-    private function executeQuery($sql)
+    private function executeQuery($sql, $params = [])
     {
         $data = array();
         $errmsg = "";
         $code = 0;
 
         try {
-            $statement = $this->pdo->query($sql);
-            if ($statement) {
-                $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($result as $record) {
-                    if (isset($record['file_data'])) {
+            // Prepare the SQL statement
+            $statement = $this->pdo->prepare($sql);
 
-                        $record['file_data'] = base64_encode($record['file_data']);
-                    }
-                    array_push($data, $record);
+            // Execute the SQL statement with parameters
+            $statement->execute($params);
+
+            // Fetch the results
+            $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($result as $record) {
+                if (isset($record['file_data'])) {
+                    $record['file_data'] = base64_encode($record['file_data']);
                 }
-                $code = 200;
-                return array("code" => $code, "data" => $data);
-            } else {
-                $errmsg = "No data found.";
-                $code = 404;
+                array_push($data, $record);
             }
+            $code = 200;
+            return array("code" => $code, "data" => $data);
         } catch (\PDOException $e) {
             $errmsg = $e->getMessage();
             $code = 403;
         }
         return array("code" => $code, "errmsg" => $errmsg);
     }
+
+
+    public function getAllProducts($id = null, $categoryId = null)
+    {
+        // Define the columns to select, including categories
+        $columns = "p.id, p.name, p.price, p.description, p.stock, 
+                    GROUP_CONCAT(c.name SEPARATOR ', ') as categories";
+
+        // Base SQL query with JOINs
+        $sql = "SELECT $columns 
+                FROM products p
+                LEFT JOIN product_categories pc ON p.id = pc.product_id
+                LEFT JOIN categories c ON pc.category_id = c.id";
+
+        // Add conditions if an ID or category ID is provided
+        $conditions = [];
+        if ($id !== null) {
+            $conditions[] = "p.id = :id";
+        }
+        if ($categoryId !== null) {
+            $conditions[] = "pc.category_id = :categoryId";
+        }
+
+        if (count($conditions) > 0) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+
+        $sql .= " GROUP BY p.id";
+
+        // Execute the query with parameter binding
+        $params = [];
+        if ($id !== null) {
+            $params['id'] = $id;
+        }
+        if ($categoryId !== null) {
+            $params['categoryId'] = $categoryId;
+        }
+
+        $result = $this->executeQuery($sql, $params);
+
+        // Process the result
+        if ($result['code'] == 200) {
+            // Return data in the expected format
+            return $this->sendPayload($result['data'], 'success', "Successfully retrieved data.", $result['code']);
+        }
+        return $this->sendPayload(null, 'failed', "Failed to retrieve data.", $result['code']);
+    }
+
+
+    public function getCategories()
+    {
+        $result = $this->get_records('categories');
+
+        if ($result['status']['remarks'] === 'success' && !empty($result['payload'])) {
+            return $result['payload'];
+        } else {
+            return $result['payload']['id'];
+        }
+    }
+
 
     public function getByEmail(string $email = null): array|false
     {
@@ -67,18 +127,6 @@ class Get extends GlobalMethods
         }
     }
 
-    public function getAllProducts($id = null)
-    {
-        $columns = "id, name, price, description, stock";
-        $conditions = ($id !== null) ? "id = '$id'" : null;
-        $result = $this->get_records('products', $conditions, $columns);
-
-        if ($result['status']['remarks'] === 'success' && !empty($result['payload'])) {
-            return $result['payload'];
-        } else {
-            return $result['payload']['id'];
-        }
-    }
 
     public function getCart($id = null)
     {
@@ -136,7 +184,8 @@ class Get extends GlobalMethods
                 user_cart_items.quantity,
                 user_carts.created_at AS cart_created_at,
                 products.description AS product_description,
-                products.name AS product_name
+                products.name AS product_name,
+                products.stock AS product_stock
             FROM user_cart_items
             JOIN user_carts ON user_cart_items.cart_id = user_carts.id
             JOIN products ON user_cart_items.product_id = products.id

@@ -24,8 +24,8 @@ export class MyorderPageComponent implements OnInit {
 
   loadItems(id: any) {
     this.service.getUserOrderItems(id).subscribe((res) => {
-      console.log(res.payload);
       this.items = res.payload;
+      console.log(this.items);
     });
   }
 

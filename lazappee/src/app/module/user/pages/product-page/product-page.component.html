@@ -1,14 +1,73 @@
-<section class="bg-gray-50 mt-16 py-8 antialiased dark:bg-gray-900 md:py-12">
+<section class="mt-16 py-8 antialiased dark:bg-gray-900 md:py-12">
   <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
-    <div
-      class="mb-4 items-end justify-between space-y-4 sm:flex sm:space-y-0 md:mb-8"
-    >
-      <h2
-        class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
-      >
-        Products
-      </h2>
-    </div>
+    <section class="antialiased dark:bg-gray-900 mb-4">
+      <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+        <div class="mb-4 flex items-center justify-between gap-4">
+          <h2
+            class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
+          >
+            Shop by category
+          </h2>
+        </div>
+
+        <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div>
+            <div
+              (click)="reset()"
+              class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 hover: dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 cursor-pointer"
+            >
+              <svg
+                class="w-4 h-4 flex-shrink-0 me-1 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"
+                />
+              </svg>
+
+              <span class="text-sm font-medium text-gray-900 dark:text-white"
+                >All</span
+              >
+            </div>
+          </div>
+          <div
+            *ngFor="let category of categories"
+            (click)="filterByCategory(category.id)"
+            class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 hover: dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 cursor-pointer"
+          >
+            <svg
+              class="w-4 h-4 flex-shrink-0 me-1 text-gray-800 dark:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.583 8.445h.01M10.86 19.71l-6.573-6.63a.993.993 0 0 1 0-1.4l7.329-7.394A.98.98 0 0 1 12.31 4l5.734.007A1.968 1.968 0 0 1 20 5.983v5.5a.992.992 0 0 1-.316.727l-7.44 7.5a.974.974 0 0 1-1.384.001Z"
+              />
+            </svg>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">{{
+              category.name
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div
       class="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4"
@@ -23,12 +82,14 @@
         "
       >
         <div class="h-56 w-full border-b border-gray-400">
+          @defer{
           <img
             class="mx-auto h-full w-full rounded-t-md"
             *ngIf="item.product_image$ | async as itemImage"
             [src]="itemImage"
             loading="lazy"
           />
+          }
         </div>
         <div class="p-6 pt-2">
           <a
@@ -75,7 +136,6 @@
         <div class="max-w-screen-sm text-center mx-auto">
           <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
           <h1 class="text-gray-500 text-xl block">No Items Found</h1>
-          <p class="text-gray-500 text-xl">It looks like your cart is empty.</p>
         </div>
       </div>
     </section>

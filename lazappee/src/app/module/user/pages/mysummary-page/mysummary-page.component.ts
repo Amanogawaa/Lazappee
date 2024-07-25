@@ -28,14 +28,19 @@ export class MysummaryPageComponent implements OnInit {
 
   loadItem(id: any) {
     this.service.getUserOrderItems(id).subscribe((res) => {
-      this.items = res.payload.map((item: any) => {
-        item.items = item.items.map((product: any) => {
-          product.image$ = this.getImage(product.product_id);
-          return product;
+      if (res && res.payload) {
+        this.items = res.payload.map((item: any) => {
+          if (item.items) {
+            item.items = item.items.map((product: any) => {
+              product.image$ = this.getImage(product.product_id);
+              return product;
+            });
+          }
+          return item;
         });
-        return item;
-      });
-      console.log(this.items);
+      } else {
+        this.items = [];
+      }
     });
   }
 

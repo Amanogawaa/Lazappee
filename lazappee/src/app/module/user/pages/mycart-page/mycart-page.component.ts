@@ -30,6 +30,7 @@ export class MycartPageComponent implements OnInit {
   data: any;
   totalPrice = 0;
   product_image$: Observable<SafeResourceUrl | undefined> | undefined;
+  selectedItems: any[] = [];
 
   constructor(
     private service: ProductsService,
@@ -45,6 +46,7 @@ export class MycartPageComponent implements OnInit {
 
   loadItems(id: any) {
     this.service.getUserItems(id).subscribe((res) => {
+      console.log(res.payload);
       this.items = res.payload.items.map((item: any) => {
         const savedQuantity = localStorage.getItem(
           `product-id-${this.currId}-${item.product_id}`
@@ -67,14 +69,14 @@ export class MycartPageComponent implements OnInit {
           );
         return item;
       });
-
-      console.log(this.items);
     });
   }
 
   incrementQuantity(item: any) {
-    item.quantity++;
-    this.saveQuantity(item);
+    if (item.quantity < item.product_stock) {
+      item.quantity++;
+      this.saveQuantity(item);
+    }
   }
 
   decrementQuantity(item: any) {
@@ -118,26 +120,40 @@ export class MycartPageComponent implements OnInit {
     });
   }
 
-  placeOrder(product_id: any, quantity: any) {
-    this.service.getUserItems(this.currId).subscribe((res) => {
-      this.data = res.payload;
-      if (this.data) {
-        const dialog = this.dialog.open(PlaceorderComponent, {
-          data: {
-            product_detail: this.items[0],
-            product_id: product_id,
-            quantity: quantity,
-            cart_id: this.data.id,
-            user_id: this.currId,
-          },
-          maxWidth: '800px',
-          width: '100%',
-        });
+  toggleSelection(item: any, event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedItems.push(item);
+      console.log(this.selectedItems);
+    } else {
+      this.selectedItems = this.selectedItems.filter(
+        (selectedItem) => selectedItem.product_id !== item.product_id
+      );
+    }
+  }
 
-        dialog.afterClosed().subscribe((res) => {
-          this.loadItems(this.currId);
-        });
-      }
+  placeOrder() {
+    if (this.selectedItems.length === 0) {
+      Swal.fire({
+        title: 'No items selected',
+        icon: 'warning',
+      });
+      return;
+    }
+
+    const dialog = this.dialog.open(PlaceorderComponent, {
+      data: {
+        items: this.selectedItems,
+        user_id: this.currId,
+        cart_id: this.cartId,
+      },
+      maxWidth: '800px',
+      width: '100%',
+    });
+
+    dialog.afterClosed().subscribe(() => {
+      this.loadItems(this.currId);
+      this.selectedItems = []; // Clear selection after placing order
     });
   }
 }

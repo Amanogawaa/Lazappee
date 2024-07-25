@@ -57,6 +57,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($post->addProduct($data));
                 break;
 
+            case 'updateproduct':
+                echo json_encode($post->updateProduct($data, $request[1]));
+                break;
+
             case 'uploadimage':
                 echo json_encode($post->uploadImage($request[1]));
                 break;
@@ -92,12 +96,16 @@ switch ($_SERVER['REQUEST_METHOD']) {
         switch ($request[0]) {
 
             case 'products':
+                // Extract query parameters (like categoryId) from the URL
+                $categoryId = isset($_GET['categoryId']) ? intval($_GET['categoryId']) : null;
+
                 if (isset($request[1])) {
-                    echo json_encode($get->getAllProducts($request[1]));
+                    echo json_encode($get->getAllProducts($request[1], $categoryId));
                 } else {
-                    echo json_encode($get->getAllProducts());
+                    echo json_encode($get->getAllProducts(null, $categoryId));
                 }
                 break;
+
 
             case 'carts':
                 if (isset($request[1])) {
@@ -133,16 +141,33 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
             case 'getproductimage':
                 if (isset($request[1])) {
-                    $get->getProductImage($request[1]);
+                    echo json_encode($get->getProductImage($request[1]));
                 } else {
                     echo "ID not provided";
                     http_response_code(400);
                 }
                 break;
 
+            case 'getcategory':
+                echo json_encode($get->getCategories());
+                break;
+
             default:
                 echo "This is forbidden";
                 http_response_code(403);
+                break;
+        }
+        break;
+
+    case 'DELETE':
+        switch ($request[0]) {
+            case 'deleteproduct':
+                if (isset($request[1])) {
+                    echo json_encode($post->deleteProduct($request[1]));
+                } else {
+                    http_response_code(400);
+                    echo json_encode(["message" => "Event ID is required for deletion"]);
+                }
                 break;
         }
         break;

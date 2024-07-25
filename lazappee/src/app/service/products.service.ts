@@ -63,12 +63,28 @@ export class ProductsService {
     return null;
   }
 
-  getAllProducts(id = null): Observable<any> {
+  getAllProducts(
+    categoryId: number | null = null,
+    id: number | null = null
+  ): Observable<any> {
+    let url = `${this.API_URL}products`;
+
     if (id) {
-      return this.http.get<any>(`${this.API_URL}products/${id}`);
-    } else {
-      return this.http.get<any>(`${this.API_URL}products`);
+      url += `/${id}`;
     }
+
+    if (categoryId !== null) {
+      if (url.includes('?')) {
+        url += `&categoryId=${categoryId}`;
+      } else {
+        url += `?categoryId=${categoryId}`;
+      }
+    }
+    return this.http.get<any>(url);
+  }
+
+  getCategories(): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}getcategory`);
   }
 
   getUserItems(id: any): Observable<any> {

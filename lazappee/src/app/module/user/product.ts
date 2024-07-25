@@ -7,5 +7,6 @@ export interface Product {
   description: string;
   stock: number;
   price: number;
+  categories: string[];
   product_image$: Observable<SafeResourceUrl | undefined>;
 }

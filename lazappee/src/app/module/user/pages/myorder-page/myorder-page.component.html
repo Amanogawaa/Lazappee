@@ -59,7 +59,7 @@
               <dd
                 class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
               >
-                ₱ {{ item.items[0].price }}
+                ₱ {{ item.items[0].price | number : "1.0-0" }}
               </dd>
             </dl>
 
@@ -85,7 +85,7 @@
               <dd
                 class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
               >
-                ₱ {{ item.total_price }}
+                ₱ {{ item.total_price | number : "1.0-0" }}
               </dd>
             </dl>
 

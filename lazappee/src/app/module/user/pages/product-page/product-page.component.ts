@@ -17,8 +17,10 @@ import { Product } from '../../product';
 })
 export class ProductPageComponent implements OnInit {
   products: Product[] = [];
+  categories: any[] = [];
   item = 12;
   p = 1;
+  selectedCategoryId: number | null = null;
 
   constructor(
     private service: ProductsService,
@@ -28,14 +30,14 @@ export class ProductPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadCategories();
   }
 
-  loadProducts() {
-    this.service.getAllProducts().subscribe({
+  loadProducts(categoryId: number | null = null) {
+    this.service.getAllProducts(categoryId).subscribe({
       next: (result: any) => {
-        console.log(result);
-        if (result && Array.isArray(result)) {
-          this.products = result.map((item) => ({
+        if (result.payload && Array.isArray(result.payload)) {
+          this.products = result.payload.map((item: any) => ({
             ...item,
             product_image$: this.service.getProductImage(item.id).pipe(
               switchMap((imageResult) => {
@@ -53,10 +55,25 @@ export class ProductPageComponent implements OnInit {
     });
   }
 
+  loadCategories() {
+    this.service.getCategories().subscribe((res) => {
+      this.categories = res;
+    });
+  }
+
   sortStock() {
     this.products.sort((a: any, b: any) => {
       return a.stock === 0 ? 1 : b.stock === 0 ? -1 : 0;
     });
+  }
+
+  filterByCategory(categoryId: number | null) {
+    this.selectedCategoryId = categoryId;
+    this.loadProducts(categoryId);
+  }
+
+  reset() {
+    this.loadProducts();
   }
 
   viewProduct(id: any) {
