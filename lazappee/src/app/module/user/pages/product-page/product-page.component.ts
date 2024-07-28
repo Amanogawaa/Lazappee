@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ProductsService } from '../../../../service/products.service';
 import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
@@ -7,13 +7,23 @@ import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Observable, of, switchMap } from 'rxjs';
 import { Product } from '../../product';
+import { FormatterPipe } from '../../../../pipe/formatter.pipe';
+import { TopsellingComponent } from '../../component/topselling/topselling.component';
+import { SalesComponent } from '../../component/sales/sales.component';
 
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [CommonModule, NgxPaginationModule],
+  imports: [
+    CommonModule,
+    NgxPaginationModule,
+    FormatterPipe,
+    TopsellingComponent,
+    SalesComponent,
+  ],
   templateUrl: './product-page.component.html',
   styleUrl: './product-page.component.css',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ProductPageComponent implements OnInit {
   products: Product[] = [];

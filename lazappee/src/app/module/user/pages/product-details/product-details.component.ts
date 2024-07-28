@@ -52,6 +52,7 @@ export class ProductDetailsComponent implements OnInit {
         if (result.payload && Array.isArray(result.payload)) {
           this.product = result.payload.map((item: any) => ({
             ...item,
+
             product_image$: this.service.getProductImage(item.id).pipe(
               switchMap((imageResult) => {
                 if (imageResult.size > 0) {
@@ -64,6 +65,7 @@ export class ProductDetailsComponent implements OnInit {
             ),
           }));
         }
+
         this.totalItemPrice();
       },
     });
@@ -168,7 +170,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   decrementQuantity() {
-    if (this.quantity > 0) {
+    if (this.quantity > 1) {
       this.quantity--;
     }
     this.totalItemPrice();

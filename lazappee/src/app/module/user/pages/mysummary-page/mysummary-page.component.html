@@ -1,5 +1,5 @@
 <section class="bg-white py-8 antialiased mt-16 dark:bg-gray-900 md:py-16">
-  <form action="#" class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+  <form class="mx-auto max-w-screen-xl px-4 2xl:px-0">
     <div class="mx-auto max-w-3xl">
       <h2
         class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
@@ -48,7 +48,7 @@
                 <td
                   class="p-4 text-right text-base font-bold text-gray-900 dark:text-white"
                 >
-                  ₱ {{ item.total_price }}
+                  ₱ {{ item.total_price | number : "1.0-0" }}
                 </td>
               </tr>
             </tbody>
@@ -65,7 +65,7 @@
               <dl class="flex items-center justify-between gap-4">
                 <dt class="text-gray-500 dark:text-gray-400">Item price</dt>
                 <dd class="text-base font-medium text-gray-900 dark:text-white">
-                  ₱{{ item.items[0].price }}
+                  ₱{{ item.items[0].price | number : "1.0-0" }}
                 </dd>
               </dl>
 
@@ -84,7 +84,7 @@
                 Total
               </dt>
               <dd class="text-lg font-bold text-green-500 dark:text-white">
-                ₱ {{ item.total_price }}
+                ₱ {{ item.total_price | number : "1.0-0" }}
               </dd>
             </dl>
           </div>

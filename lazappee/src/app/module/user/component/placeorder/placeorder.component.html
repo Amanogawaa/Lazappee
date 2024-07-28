@@ -12,7 +12,7 @@
             Item price
           </dt>
           <dd class="text-base font-medium text-gray-900 dark:text-white">
-            ₱{{ item.price }}
+            ₱{{ item.price | number : "1.0-0" }}
           </dd>
         </dl>
         <dl class="flex items-center justify-between gap-4">
@@ -23,13 +23,21 @@
             {{ item.quantity }}x
           </dd>
         </dl>
+        <dl class="flex items-center justify-between gap-4">
+          <dt class="text-base font-normal text-gray-500 dark:text-gray-400">
+            Item discount
+          </dt>
+          <dd class="text-base font-medium text-gray-900 dark:text-white">
+            {{ item.product_discount | number : "1.0-0" }}%
+          </dd>
+        </dl>
       </div>
       <dl
         class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700"
       >
         <dt class="text-base font-bold text-gray-900 dark:text-white">Total</dt>
         <dd class="text-base font-bold text-gray-900 dark:text-white">
-          ₱{{ totalPrice }}
+          ₱{{ totalPrice | number : "1.0-0" }}
         </dd>
       </dl>
     </div>

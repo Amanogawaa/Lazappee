@@ -57,6 +57,8 @@ export class MycartPageComponent implements OnInit {
           item.quantity = parseInt(savedQuantity, 10);
         }
 
+        item.unitPrice = item.price * item.quantity;
+
         item.product_image$ = this.service
           .getProductImage(item.product_id)
           .pipe(
@@ -77,17 +79,19 @@ export class MycartPageComponent implements OnInit {
   incrementQuantity(item: any) {
     if (item.quantity < item.product_stock) {
       item.quantity++;
-      this.saveQuantity(item);
-      this.updateTotal();
+      item.unitPrice = item.price * item.quantity;
     }
+    this.saveQuantity(item);
+    this.updateTotal();
   }
 
   decrementQuantity(item: any) {
     if (item.quantity > 1) {
       item.quantity--;
-      this.saveQuantity(item);
-      this.updateTotal();
+      item.unitPrice = item.price * item.quantity;
     }
+    this.saveQuantity(item);
+    this.updateTotal();
   }
 
   saveQuantity(item: any) {
@@ -120,6 +124,7 @@ export class MycartPageComponent implements OnInit {
             icon: 'success',
           });
           this.loadItems(this.currId);
+          localStorage.removeItem(`product-id-${this.currId}-${product_id}`);
         });
       }
     });
@@ -205,6 +210,8 @@ export class MycartPageComponent implements OnInit {
     dialog.afterClosed().subscribe(() => {
       this.loadItems(this.currId);
       this.selectedItems = [];
+      this.totalPrice = 0;
+      this.updateSelectAllCheckbox();
     });
   }
 }

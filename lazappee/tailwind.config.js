@@ -56,5 +56,5 @@ module.exports = {
       ],
     },
   },
-  plugins: [require("flowbite/plugin")],
+  plugins: [require("@tailwindcss/aspect-ratio"), require("flowbite/plugin")],
 };

@@ -59,7 +59,7 @@ class Get extends GlobalMethods
     public function getAllProducts($id = null, $categoryId = null)
     {
         // Define the columns to select, including categories
-        $columns = "p.id, p.name, p.price, p.description, p.stock, 
+        $columns = "p.id, p.name, p.price, p.description, p.stock, discount, discount_expiry, total_sold,
                     GROUP_CONCAT(c.name SEPARATOR ', ') as categories";
 
         // Base SQL query with JOINs
@@ -185,6 +185,7 @@ class Get extends GlobalMethods
                 user_carts.created_at AS cart_created_at,
                 products.description AS product_description,
                 products.name AS product_name,
+                products.discount AS product_discount,
                 products.stock AS product_stock
             FROM user_cart_items
             JOIN user_carts ON user_cart_items.cart_id = user_carts.id
@@ -267,6 +268,65 @@ class Get extends GlobalMethods
             return $this->sendPayload(null, 'failed', 'Failed to retrieve user orders.', 500);
         }
     }
+
+    public function getUserOrder($userId, $orderId)
+    {
+        // Validate the user ID and order ID
+        if (empty($userId)) {
+            return $this->sendPayload(null, 'failed', 'User ID is required.', 400);
+        }
+
+        if (empty($orderId)) {
+            return $this->sendPayload(null, 'failed', 'Order ID is required.', 400);
+        }
+
+        // Query to get the specific order for the user
+        $orderQuery = "
+        SELECT 
+            uo.id AS order_id,
+            uo.user_id,
+            uo.total_price,
+            uo.created_at AS order_created_at
+        FROM user_orders uo
+        WHERE uo.user_id = :user_id AND uo.id = :order_id
+    ";
+
+        try {
+            // Execute the query to get the specific order
+            $stmt = $this->pdo->prepare($orderQuery);
+            $stmt->execute(['user_id' => $userId, 'order_id' => $orderId]);
+            $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (empty($order)) {
+                return $this->sendPayload(null, 'success', 'Order not found for the user.', 404);
+            }
+
+            // Query to get items for the specific order
+            $itemsQuery = "
+            SELECT 
+                ooi.product_id,
+                ooi.quantity,
+                ooi.price,
+                p.name AS product_name,
+                p.description AS product_description
+            FROM user_order_items ooi
+            JOIN products p ON ooi.product_id = p.id
+            WHERE ooi.order_id = :order_id
+        ";
+
+            $stmt = $this->pdo->prepare($itemsQuery);
+            $stmt->execute(['order_id' => $orderId]);
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $order['items'] = $items;
+
+            return $this->sendPayload($order, 'success', 'Successfully retrieved order details.', 200);
+        } catch (\PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return $this->sendPayload(null, 'failed', 'Failed to retrieve order details.', 500);
+        }
+    }
+
 
 
     // getting image 

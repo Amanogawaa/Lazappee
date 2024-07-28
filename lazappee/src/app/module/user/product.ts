@@ -9,4 +9,7 @@ export interface Product {
   price: number;
   categories: string[];
   product_image$: Observable<SafeResourceUrl | undefined>;
+  discount: number;
+  discount_expiry: Date | string;
+  total_sold: number;
 }

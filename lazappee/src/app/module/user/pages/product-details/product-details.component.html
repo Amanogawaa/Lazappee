@@ -46,7 +46,7 @@
         </h1>
         <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
           <p class="text-2xl font-bold text-gray-900 sm:text-3xl">
-            ₱ {{ product[0].price }}
+            ₱ {{ product[0].price | number : "1.0-0" }}
           </p>
         </div>
         <div class="sm:items-center sm:gap-4 sm:flex">
@@ -204,7 +204,7 @@
                   <dd
                     class="text-base font-medium text-gray-900 dark:text-white"
                   >
-                    ₱ {{ product[0].price | formatter }}
+                    ₱ {{ product[0].price | number : "1.0-0" }}
                   </dd>
                 </dl>
 
@@ -229,7 +229,7 @@
                   Total
                 </dt>
                 <dd class="text-base font-bold text-gray-900 dark:text-white">
-                  ₱ {{ totalPrice | formatter }}
+                  ₱ {{ totalPrice | number : "1.0-0" }}
                 </dd>
               </dl>
             </div>

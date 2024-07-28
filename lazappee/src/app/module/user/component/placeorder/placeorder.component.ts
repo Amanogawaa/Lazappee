@@ -27,14 +27,17 @@ export class PlaceorderComponent implements OnInit {
   }
 
   calculateTotalPrice() {
-    this.totalPrice = this.data.items.reduce(
-      (sum: number, item: any) => sum + item.price * item.quantity,
-      0
-    );
+    this.totalPrice = this.data.items.reduce((sum: number, item: any) => {
+      const price = parseFloat(item.price);
+      const discount = parseFloat(item.product_discount);
+
+      const discountedPrice = price - price * (discount / 100);
+
+      return Math.round(sum + discountedPrice * item.quantity);
+    }, 0);
   }
 
   orderItems() {
-    // Initialize an empty array to hold the items
     const itemsArray: { product_id: any; quantity: any; price: any }[] = [];
 
     // Iterate over the items to build the array
@@ -53,8 +56,6 @@ export class PlaceorderComponent implements OnInit {
       items: itemsArray,
     };
 
-    console.log(orderData);
-
     Swal.fire({
       title: 'Are you sure you want to purchase these items?',
       icon: 'question',
@@ -71,6 +72,12 @@ export class PlaceorderComponent implements OnInit {
               icon: 'success',
             });
             this.dialog.closeAll();
+
+            itemsArray.forEach((item) => {
+              localStorage.removeItem(
+                `product-id-${this.data.user_id}-${item.product_id}`
+              );
+            });
           },
           (error) => {
             console.error('Error during purchase', error);

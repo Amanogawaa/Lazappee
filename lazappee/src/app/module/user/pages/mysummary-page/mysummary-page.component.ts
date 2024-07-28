@@ -41,7 +41,20 @@ export class MysummaryPageComponent implements OnInit {
       } else {
         this.items = [];
       }
+
+      console.log(this.items);
     });
+  }
+
+  calculateTotalPrice(items: any[]): number {
+    return items.reduce(
+      (total, item) => total + parseFloat(item.price) * item.quantity,
+      0
+    );
+  }
+
+  calculateTotalQuantity(items: any[]): number {
+    return items.reduce((total, item) => total + item.quantity, 0);
   }
 
   getImage(id: any): Observable<SafeResourceUrl | undefined> {

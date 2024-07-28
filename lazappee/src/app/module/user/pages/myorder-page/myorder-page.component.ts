@@ -3,6 +3,8 @@ import { ProductsService } from '../../../../service/products.service';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { RouterLink } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { SummaryComponent } from '../../component/summary/summary.component';
 
 @Component({
   selector: 'app-myorder-page',
@@ -15,7 +17,7 @@ export class MyorderPageComponent implements OnInit {
   currId: any;
   items: any;
 
-  constructor(private service: ProductsService) {}
+  constructor(private service: ProductsService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.currId = this.service.getCurrentUserId();
@@ -54,6 +56,17 @@ export class MyorderPageComponent implements OnInit {
           this.loadItems(this.currId);
         });
       }
+    });
+  }
+
+  viewSummary(id: any) {
+    const dialog = this.dialog.open(SummaryComponent, {
+      data: {
+        user_id: this.currId,
+        order_id: id,
+      },
+      maxWidth: '800px',
+      width: '100%',
     });
   }
 }

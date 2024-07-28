@@ -95,6 +95,12 @@ export class ProductsService {
     return this.http.get<any>(`${this.API_URL}orderitems/${id}`);
   }
 
+  userOrderItems(id: any, order_id: any): Observable<any> {
+    return this.http.get<any>(
+      `${this.API_URL}userorderitems/${id}/${order_id}`
+    );
+  }
+
   getProductImage(id: number): Observable<any> {
     return this.http.get(`${this.API_URL}getproductimage/${id}`, {
       responseType: 'blob',

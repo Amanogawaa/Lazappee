@@ -1,0 +1,41 @@
+<h2 class="text-2xl mt-16 font-bold tracking-tight text-gray-900">
+  Top selling item📈
+</h2>
+<section
+  class="bg-white px-4 antialiased dark:bg-gray-900 shadow-lg rounded-md"
+>
+  <div
+    class="mx-auto grid max-w-screen-xl rounded-lg bg-white p-4 dark:bg-gray-800 lg:grid-cols-12 lg:gap-8 xl:gap-16"
+    *ngIf="highestSoldProduct"
+  >
+    <div class="lg:col-span-5 lg:mt-0">
+      <a>
+        <img
+          class="mb-4 h-56 w-56 dark:hidden sm:h-96 sm:w-96 rounded-md"
+          *ngIf="highestSoldProduct.product_image$ | async as itemImage"
+          [src]="itemImage"
+          loading="lazy"
+        />
+      </a>
+    </div>
+    <div class="me-auto place-self-center lg:col-span-7">
+      <h1
+        class="mb-3 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-4xl"
+      >
+        {{ highestSoldProduct.name }}
+      </h1>
+      <p class="text-gray-500 dark:text-gray-400">
+        {{ highestSoldProduct.description }}
+      </p>
+      <p class="mb-6 text-gray-500 dark:text-gray-400">
+        ₱{{ highestSoldProduct.price | number : "1.0-0" }}
+      </p>
+      <button
+        (click)="viewProduct(highestSoldProduct.id)"
+        class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-5 py-3 text-center text-base font-medium text-white hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
+      >
+        View Item
+      </button>
+    </div>
+  </div>
+</section>

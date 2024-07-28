@@ -139,6 +139,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 break;
 
+            case 'userorderitems':
+                if (isset($request[1])) {
+                    echo json_encode($get->getUserOrder($request[1], $request[2]));
+                } else {
+                    echo ("No id provided");
+                }
+                break;
+
             case 'getproductimage':
                 if (isset($request[1])) {
                     echo json_encode($get->getProductImage($request[1]));
