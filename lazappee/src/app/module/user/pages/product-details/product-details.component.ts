@@ -89,7 +89,7 @@ export class ProductDetailsComponent implements OnInit {
           (response) => {
             const Toast = Swal.mixin({
               toast: true,
-              position: 'top-end',
+              position: 'bottom-end',
               showConfirmButton: false,
               timer: 3000,
               timerProgressBar: true,
@@ -132,8 +132,10 @@ export class ProductDetailsComponent implements OnInit {
           (response) => {
             const Toast = Swal.mixin({
               toast: true,
-              position: 'top-end',
+              position: 'bottom-end',
               showConfirmButton: false,
+              background: '#fff',
+              color: '#111',
               timer: 3000,
               timerProgressBar: true,
               didOpen: (toast) => {
@@ -148,7 +150,7 @@ export class ProductDetailsComponent implements OnInit {
             localStorage.removeItem(
               `product-id-${this.currId}-${this.productId}`
             );
-            this.quantity = 0;
+            this.quantity = 1;
           },
           (error) => {
             console.error('Error during purchase', error);

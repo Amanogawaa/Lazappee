@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { initFlowbite } from 'flowbite';
 import Swal from 'sweetalert2';
+import { ProductsService } from '../../../../service/products.service';
 
 @Component({
   selector: 'app-navbar',
@@ -11,10 +12,21 @@ import Swal from 'sweetalert2';
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent implements OnInit {
-  constructor(private router: Router) {}
+  items: any[] = [];
+
+  constructor(private router: Router, private service: ProductsService) {}
 
   ngOnInit(): void {
     initFlowbite();
+
+    const id = this.service.getCurrentUserId();
+    this.loadCart(id);
+  }
+
+  loadCart(id: any) {
+    this.service.getUserItems(id).subscribe((res) => {
+      this.items = res.payload.items;
+    });
   }
 
   logout(): void {
@@ -29,7 +41,7 @@ export class NavbarComponent implements OnInit {
       if (result.isConfirmed) {
         const Toast = Swal.mixin({
           toast: true,
-          position: 'top-end',
+          position: 'bottom-end',
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,

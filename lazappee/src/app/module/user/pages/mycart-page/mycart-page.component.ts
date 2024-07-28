@@ -29,6 +29,7 @@ export class MycartPageComponent implements OnInit {
   currId: any;
   data: any;
   totalPrice = 0;
+  unitPrice = 0;
   product_image$: Observable<SafeResourceUrl | undefined> | undefined;
   selectedItems: any[] = [];
 
@@ -42,6 +43,7 @@ export class MycartPageComponent implements OnInit {
     this.currId = this.service.getCurrentUserId();
     this.cartId = this.service.getUserCart();
     this.loadItems(this.currId);
+    this.updateSelectAllCheckbox();
   }
 
   loadItems(id: any) {
@@ -76,13 +78,15 @@ export class MycartPageComponent implements OnInit {
     if (item.quantity < item.product_stock) {
       item.quantity++;
       this.saveQuantity(item);
+      this.updateTotal();
     }
   }
 
   decrementQuantity(item: any) {
-    if (item.quantity > 0) {
+    if (item.quantity > 1) {
       item.quantity--;
       this.saveQuantity(item);
+      this.updateTotal();
     }
   }
 
@@ -91,6 +95,7 @@ export class MycartPageComponent implements OnInit {
       `product-id-${this.currId}-${item.product_id}`,
       item.quantity.toString()
     );
+    this.updateTotal();
   }
 
   removeToCart(product_id: any) {
@@ -120,6 +125,50 @@ export class MycartPageComponent implements OnInit {
     });
   }
 
+  updateTotal() {
+    this.totalPrice = this.selectedItems.reduce((total, item) => {
+      return Math.round(total + item.price * item.quantity);
+    }, 0);
+  }
+
+  optionSelection() {
+    const allSelected = this.selectedItems.length === this.items.length;
+
+    if (allSelected) {
+      this.selectedItems = [];
+      this.items.forEach((item) => {
+        const checkbox = document.querySelector<HTMLInputElement>(
+          `input[value="${item.product_id}"]`
+        );
+        if (checkbox) {
+          checkbox.checked = false;
+        }
+      });
+    } else {
+      this.selectedItems = this.items.slice();
+      this.items.forEach((item) => {
+        const checkbox = document.querySelector<HTMLInputElement>(
+          `input[value="${item.product_id}"]`
+        );
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
+    }
+    this.updateTotal();
+  }
+
+  updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.querySelector<HTMLInputElement>(
+      `input[id="selectall-checkbox"]`
+    );
+    if (selectAllCheckbox) {
+      selectAllCheckbox.checked =
+        this.items.length > 0 &&
+        this.selectedItems.length === this.items.length;
+    }
+  }
+
   toggleSelection(item: any, event: Event) {
     const checkbox = event.target as HTMLInputElement;
     if (checkbox.checked) {
@@ -130,9 +179,11 @@ export class MycartPageComponent implements OnInit {
         (selectedItem) => selectedItem.product_id !== item.product_id
       );
     }
+    this.updateTotal();
+    this.updateSelectAllCheckbox();
   }
 
-  placeOrder() {
+  checkout() {
     if (this.selectedItems.length === 0) {
       Swal.fire({
         title: 'No items selected',
@@ -153,7 +204,7 @@ export class MycartPageComponent implements OnInit {
 
     dialog.afterClosed().subscribe(() => {
       this.loadItems(this.currId);
-      this.selectedItems = []; // Clear selection after placing order
+      this.selectedItems = [];
     });
   }
 }

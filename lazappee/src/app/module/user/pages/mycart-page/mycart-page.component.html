@@ -1,48 +1,73 @@
-<section class="bg-white mt-5 py-8 antialiased dark:bg-gray-900 md:py-16">
-  <div class="flex justify-center w-full px-4">
-    <div class="font-sans w-[80%] p-4">
+<section class="bg-white mt-5 antialiased dark:bg-gray-900 pt-16">
+  <div class="flex justify-center w-full px-4" *ngIf="items.length !== 0">
+    <div class="font-sans w-[80%]">
       <h1 class="text-2xl font-extrabold text-gray-800">My Cart</h1>
-      <div class="grid md:grid-cols-2 gap-4 mt-8">
-        <div class="md:col-span-2 space-y-4" *ngFor="let item of items">
-          <div
-            class="flex gap-4 bg-white px-4 py-6 rounded-md border border-slate-500"
+
+      <div class="relative mt-1 overflow-x-auto shadow-md sm:rounded-lg mb-2">
+        <table
+          class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+        >
+          <thead
+            class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
           >
-            <div class="flex items-center gap-3">
-              <input
-                type="checkbox"
-                [value]="item.product_id"
-                (change)="toggleSelection(item, $event)"
-              />
-              <span>Select</span>
-            </div>
-            <div class="flex gap-4">
-              <div class="w-28 h-28 max-sm:w-24 max-sm:h-24 shrink-0">
+            <tr>
+              <th scope="col" class="px-16 py-3">
+                <span class="sr-only">Image</span>
+              </th>
+              <th scope="col" class="px-6 py-3"></th>
+              <th scope="col" class="px-6 py-3">Product</th>
+              <th scope="col" class="px-6 py-3">Price</th>
+              <th scope="col" class="px-6 py-3">Quantity</th>
+              <th scope="col" class="px-6 py-3">Total</th>
+              <th scope="col" class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              class="bg-white border-b max-h-[160.4px] h-[160.4px] dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              *ngFor="let item of items"
+            >
+              <td class="p-4">
+                <div class="flex items-center mb-4 ms-10">
+                  <input
+                    id="default-checkbox"
+                    type="checkbox"
+                    [value]="item.product_id"
+                    (change)="toggleSelection(item, $event)"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label
+                    for="default-checkbox"
+                    class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  ></label>
+                </div>
+              </td>
+              <td class="p-4">
                 <img
                   *ngIf="item.product_image$ | async as itemImage"
                   [src]="itemImage"
                   loading="lazy"
-                  class="w-full h-full object-contain"
+                  class="w-16 md:w-32 max-w-full max-h-full"
                 />
-              </div>
+              </td>
+              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                <h3 class="text-lg font-bold text-gray-800">
+                  {{ item.product_name }}
+                </h3>
+                <p
+                  class="text-sm font-semibold text-gray-500 mt-2 flex items-center gap-2"
+                >
+                  <span> {{ item.product_description }}</span>
+                </p>
+                <p class="text-xs font-bold text-gray-500 mt-2">
+                  Stock: {{ item.product_stock }}
+                </p>
+              </td>
 
-              <div class="flex flex-col gap-4">
-                <div class="space-y-2">
-                  <h3 class="text-lg font-bold text-gray-800">
-                    {{ item.product_name }}
-                  </h3>
-                  <p
-                    class="text-sm font-semibold text-gray-500 mt-2 flex items-center gap-2"
-                  >
-                    <span> {{ item.product_description }}</span>
-                  </p>
-                  <h3 class="text-sm font-bold text-gray-800 mt-auto">
-                    Price:₱{{ item.price | number : "1.0-0" }}
-                  </h3>
-                  <h3 class="text-sm font-bold text-gray-800 mt-auto">
-                    Stock: {{ item.product_stock }}
-                  </h3>
-                </div>
-
+              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                ₱{{ item.price | number : "1.0-0" }}
+              </td>
+              <td class="px-6 py-4">
                 <div class="mt-auto flex items-center gap-3">
                   <button
                     type="button"
@@ -89,35 +114,85 @@
                     </svg>
                   </button>
                 </div>
-              </div>
+              </td>
+              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                ₱{{ unitPrice }}
+              </td>
+              <td class="px-6 py-4">
+                <button
+                  (click)="removeToCart(item.product_id)"
+                  class="font-medium text-red-600 dark:text-red-500 hover:underline"
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <nav
+        class="bg-gray-100 w-full dark:bg-gray-800 sticky bottom-0 antialiased"
+      >
+        <div class="px-4 mx-auto 2xl:px-0 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+              <div class="shrink-0"></div>
+
+              <ul
+                class="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center"
+              >
+                <li>
+                  <div class="flex items-center ms-10">
+                    <input
+                      id="selectall-checkbox"
+                      type="checkbox"
+                      (click)="optionSelection()"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label
+                      for="selectall-checkbox"
+                      class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                      >Select All <span>({{ items.length }})</span></label
+                    >
+                  </div>
+                </li>
+
+                <li class="shrink-0">
+                  <dl class="flex items-center justify-between gap-4">
+                    <dt
+                      class="text-base font-normal text-gray-500 dark:text-gray-400"
+                    >
+                      Item(s)
+                    </dt>
+                    <dd
+                      class="text-base font-medium text-gray-900 dark:text-white"
+                    >
+                      {{ selectedItems.length }}
+                    </dd>
+                  </dl>
+                </li>
+              </ul>
             </div>
 
-            <div class="ml-auto flex flex-col justify-between">
-              <div class="flex items-start gap-4 justify-end">
-                <button type="button" (click)="removeToCart(item.product_id)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-4 cursor-pointer fill-red-500 inline-block"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M19 7a1 1 0 0 0-1 1v11.191A1.92 1.92 0 0 1 15.99 21H8.01A1.92 1.92 0 0 1 6 19.191V8a1 1 0 0 0-2 0v11.191A3.918 3.918 0 0 0 8.01 23h7.98A3.918 3.918 0 0 0 20 19.191V8a1 1 0 0 0-1-1Zm1-3h-4V2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H4a1 1 0 0 0 0 2h16a1 1 0 0 0 0-2ZM10 4V3h4v1Z"
-                      data-original="#000000"
-                    ></path>
-                    <path
-                      d="M11 17v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Zm4 0v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Z"
-                      data-original="#000000"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
+            <div class="flex items-center lg:space-x-2 mr-5">
+              <dl
+                class="flex items-center justify-between gap-4 dark:border-gray-700 me-7"
+              >
+                <dt
+                  class="text-base font-bold text-gray-900 dark:text-white -me-3"
+                >
+                  Total:
+                </dt>
+                <dd class="text-base font-bold text-gray-900 dark:text-white">
+                  ₱{{ totalPrice | number : "1.0-2" }}
+                </dd>
+              </dl>
               <button
-                (click)="placeOrder()"
-                class="text-white mt-auto sm:mt-0 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 flex items-center justify-center whitespace-nowrap"
-                role="button"
+                (click)="checkout()"
+                class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
               >
                 <svg
-                  class="w-5 h-5 -ms-2 me-2"
+                  class="w-5 h-5 lg:me-1"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -130,27 +205,25 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
+                    d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
                   />
                 </svg>
-
-                Buy now
+                Proceed to Checkout
               </button>
             </div>
           </div>
         </div>
-      </div>
-      <section *ngIf="items.length === 0">
-        <div class="py-4 px-4 mx-auto max-w-screen-xl h-full lg:py-16 lg:px-6">
-          <div class="max-w-screen-sm text-center mx-auto">
-            <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
-            <h1 class="text-gray-500 text-xl block">No Items Found</h1>
-            <p class="text-gray-500 text-xl">
-              It looks like your cart is empty.
-            </p>
-          </div>
-        </div>
-      </section>
+      </nav>
     </div>
   </div>
+
+  <section *ngIf="items.length === 0">
+    <div class="py-4 px-4 mx-auto max-w-screen-xl h-full lg:py-16 lg:px-6">
+      <div class="max-w-screen-sm text-center mx-auto">
+        <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
+        <h1 class="text-gray-500 text-xl block">No Items Found</h1>
+        <p class="text-gray-500 text-xl">It looks like your cart is empty.</p>
+      </div>
+    </div>
+  </section>
 </section>

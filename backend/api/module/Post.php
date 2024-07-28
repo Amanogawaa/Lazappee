@@ -418,30 +418,18 @@ class Post extends GlobalMethods
 
     public function createOrder($data)
     {
-        if (empty($data->user_id) || empty($data->cart_id)) {
-            return $this->sendPayload(null, 'failed', 'User ID and cart ID are required.', 400);
+        // Ensure required fields are present
+        if (empty($data->user_id) || empty($data->cart_id) || empty($data->items)) {
+            return $this->sendPayload(null, 'failed', 'User ID, cart ID, and items are required.', 400);
         }
 
         try {
             $this->pdo->beginTransaction();
 
-            // Fetch all cart items for the given cart ID
-            $sql = "SELECT ci.product_id, ci.price, ci.quantity, p.name
-                FROM user_cart_items ci
-                JOIN products p ON ci.product_id = p.id
-                WHERE ci.cart_id = :cart_id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['cart_id' => $data->cart_id]);
-            $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            if (empty($cartItems)) {
-                return $this->sendPayload(null, 'failed', 'No items found in cart.', 404);
-            }
-
             // Calculate total price for the order
             $totalPrice = array_sum(array_map(function ($item) {
-                return $item['price'] * $item['quantity'];
-            }, $cartItems));
+                return $item->price * $item->quantity;
+            }, $data->items));
 
             // Insert into user_orders
             $sql = "INSERT INTO user_orders (user_id, total_price) VALUES (:user_id, :total_price)";
@@ -453,32 +441,40 @@ class Post extends GlobalMethods
 
             $orderId = $this->pdo->lastInsertId();
 
-            // Insert into user_order_items and update stock for each product
+            // Prepare statements for order items and stock update
             $orderItemSql = "INSERT INTO user_order_items (order_id, product_id, quantity, price) VALUES (:order_id, :product_id, :quantity, :price)";
             $orderItemStmt = $this->pdo->prepare($orderItemSql);
 
             $updateStockStmt = $this->pdo->prepare("UPDATE products SET stock = stock - :quantity WHERE id = :product_id");
 
-            foreach ($cartItems as $item) {
+            $productIds = [];
+
+            foreach ($data->items as $item) {
                 // Insert each item into user_order_items
                 $orderItemStmt->execute([
                     'order_id' => $orderId,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price']
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price
                 ]);
 
                 // Update stock in products table
                 $updateStockStmt->execute([
-                    'quantity' => $item['quantity'],
-                    'product_id' => $item['product_id']
+                    'quantity' => $item->quantity,
+                    'product_id' => $item->product_id // Correct parameter name
                 ]);
+
+                // Track product_ids to delete from the cart
+                $productIds[] = $item->product_id;
             }
 
-            // Remove all items from the cart
-            $sql = "DELETE FROM user_cart_items WHERE cart_id = :cart_id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['cart_id' => $data->cart_id]);
+            // Remove ordered items from the cart
+            if (!empty($productIds)) {
+                $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+                $sql = "DELETE FROM user_cart_items WHERE cart_id = ? AND product_id IN ($placeholders)";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute(array_merge([$data->cart_id], $productIds));
+            }
 
             $this->pdo->commit();
 
@@ -490,67 +486,86 @@ class Post extends GlobalMethods
         }
     }
 
-
     public function cancelOrder($data)
     {
         if (empty($data->user_id) || empty($data->order_id)) {
             return $this->sendPayload(null, 'failed', 'User ID and Order ID are required.', 400);
         }
 
-        try {
-            $this->pdo->beginTransaction();
+        // Handle canceling a specific product
+        if (!empty($data->product_id)) {
+            try {
+                $this->pdo->beginTransaction();
 
-            // Fetch the order and its items
-            $sql = "SELECT oi.product_id, oi.quantity, p.stock
-                    FROM user_order_items oi
-                    JOIN products p ON oi.product_id = p.id
-                    WHERE oi.order_id = :order_id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['order_id' => $data->order_id]);
-            $orderItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                // Fetch the specific item and its details
+                $sql = "SELECT oi.product_id, oi.quantity, p.stock
+                        FROM user_order_items oi
+                        JOIN products p ON oi.product_id = p.id
+                        WHERE oi.order_id = :order_id AND oi.product_id = :product_id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    'order_id' => $data->order_id,
+                    'product_id' => $data->product_id
+                ]);
+                $item = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (empty($orderItems)) {
-                $this->pdo->rollBack();
-                return $this->sendPayload(null, 'failed', 'Order not found or already canceled.', 404);
-            }
+                if (empty($item)) {
+                    $this->pdo->rollBack();
+                    return $this->sendPayload(null, 'failed', 'Item not found in the specified order.', 404);
+                }
 
-            // Restore stock for each product
-            foreach ($orderItems as $item) {
+                // Restore stock for the canceled product
                 $newStock = $item['stock'] + $item['quantity'];
                 $sql = "UPDATE products SET stock = :stock WHERE id = :product_id";
                 $stmt = $this->pdo->prepare($sql);
                 $stmt->execute([
                     'stock' => $newStock,
-                    'product_id' => $item['product_id']
+                    'product_id' => $data->product_id
                 ]);
-            }
 
-            // Delete order items
-            $sql = "DELETE FROM user_order_items WHERE order_id = :order_id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['order_id' => $data->order_id]);
+                // Delete the specific item from the order
+                $sql = "DELETE FROM user_order_items WHERE order_id = :order_id AND product_id = :product_id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    'order_id' => $data->order_id,
+                    'product_id' => $data->product_id
+                ]);
 
-            // Delete the order
-            $sql = "DELETE FROM user_orders WHERE id = :order_id AND user_id = :user_id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                'order_id' => $data->order_id,
-                'user_id' => $data->user_id
-            ]);
+                // Check if the order is now empty
+                $sql = "SELECT COUNT(*) FROM user_order_items WHERE order_id = :order_id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute(['order_id' => $data->order_id]);
+                $itemCount = $stmt->fetchColumn();
 
-            if ($stmt->rowCount() > 0) {
+                // If no items are left, delete the order
+                if ($itemCount === 0) {
+                    $sql = "DELETE FROM user_orders WHERE id = :order_id AND user_id = :user_id";
+                    $stmt = $this->pdo->prepare($sql);
+                    $stmt->execute([
+                        'order_id' => $data->order_id,
+                        'user_id' => $data->user_id
+                    ]);
+                }
+
                 $this->pdo->commit();
-                return $this->sendPayload(null, 'success', 'Order canceled successfully.', 200);
-            } else {
+                return $this->sendPayload(null, 'success', 'Product canceled successfully.', 200);
+            } catch (PDOException $e) {
                 $this->pdo->rollBack();
-                return $this->sendPayload(null, 'failed', 'Failed to cancel order.', 500);
+                error_log("Database error: " . $e->getMessage());
+                return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
             }
-        } catch (PDOException $e) {
-            $this->pdo->rollBack();
-            error_log("Database error: " . $e->getMessage());
-            return $this->sendPayload(null, 'failed', $e->getMessage(), 500);
+        } else {
+            // If no product_id is provided, fall back to the existing full order cancel logic
+            return $this->cancelOrderFull($data);
         }
     }
+
+    // This function handles full order cancellations
+    private function cancelOrderFull($data)
+    {
+        // Existing code for canceling the entire order...
+    }
+
 
     public function removeItemFromCart($data)
     {

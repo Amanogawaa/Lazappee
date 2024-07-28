@@ -21,94 +21,94 @@
           *ngIf="items !== null"
         >
           <div
-            class="flex flex-wrap items-center gap-y-4 py-6 border-b border-gray-300"
-            *ngFor="let item of items"
+            class="py-6 border-b border-gray-300"
+            *ngFor="let order of items"
           >
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt
-                class="text-base font-medium text-gray-500 dark:text-gray-400"
-              >
-                Order Name:
-              </dt>
-              <dd
-                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
-              >
-                <a class="hover:underline">{{ item.items[0].product_name }}</a>
-              </dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt
-                class="text-base font-medium text-gray-500 dark:text-gray-400"
-              >
-                Date:
-              </dt>
-              <dd
-                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
-              >
-                {{ item.order_created_at | date : "longDate" }}
-              </dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt
-                class="text-base font-medium text-gray-500 dark:text-gray-400"
-              >
-                Price:
-              </dt>
-              <dd
-                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
-              >
-                ₱ {{ item.items[0].price | number : "1.0-0" }}
-              </dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt
-                class="text-base font-medium text-gray-500 dark:text-gray-400"
-              >
-                Quantity:
-              </dt>
-              <dd
-                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
-              >
-                {{ item.items[0].quantity }}
-              </dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt
-                class="text-base font-medium text-gray-500 dark:text-gray-400"
-              >
-                Total Price:
-              </dt>
-              <dd
-                class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
-              >
-                ₱ {{ item.total_price | number : "1.0-0" }}
-              </dd>
-            </dl>
-
-            <div
-              class="w-full flex lg:w-64 lg:items-center lg:justify-end gap-4"
+            <h3
+              class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
             >
-              <button
-                (click)="cancelOrder(item.order_id)"
-                type="button"
-                class="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
+              Order ID: {{ order.order_id }}
+            </h3>
+            <div class="flex flex-wrap items-center gap-y-4 py-6">
+              <div
+                *ngFor="let item of order.items"
+                class="w-full flex items-center gap-y-4 py-2 border-b border-gray-300"
               >
-                Cancel order
-              </button>
+                <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                  <dt
+                    class="text-base font-medium text-gray-500 dark:text-gray-400"
+                  >
+                    Product Name:
+                  </dt>
+                  <dd
+                    class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
+                  >
+                    <a class="hover:underline">{{ item.product_name }}</a>
+                  </dd>
+                </dl>
+
+                <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                  <dt
+                    class="text-base font-medium text-gray-500 dark:text-gray-400"
+                  >
+                    Date:
+                  </dt>
+                  <dd
+                    class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
+                  >
+                    {{ order.order_created_at | date : "longDate" }}
+                  </dd>
+                </dl>
+
+                <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                  <dt
+                    class="text-base font-medium text-gray-500 dark:text-gray-400"
+                  >
+                    Price:
+                  </dt>
+                  <dd
+                    class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
+                  >
+                    ₱ {{ item.price | number : "1.0-0" }}
+                  </dd>
+                </dl>
+
+                <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                  <dt
+                    class="text-base font-medium text-gray-500 dark:text-gray-400"
+                  >
+                    Quantity:
+                  </dt>
+                  <dd
+                    class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white"
+                  >
+                    {{ item.quantity }}
+                  </dd>
+                </dl>
+
+                <div
+                  class="w-full flex lg:w-64 lg:items-center lg:justify-end gap-4"
+                >
+                  <button
+                    (click)="cancelOrder(item.product_id, order.order_id)"
+                    type="button"
+                    class="rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
       <section *ngIf="items === null">
         <div class="py-4 px-4 mx-auto max-w-screen-xl h-full lg:py-16 lg:px-6">
           <div class="max-w-screen-sm text-center mx-auto">
             <h1 class="text-gray-500 text-xl block">(￣ ￣|||)</h1>
             <h1 class="text-gray-500 text-xl block">No Items Found</h1>
-            <p class="text-gray-500 text-xl">You dont have any order yet.</p>
+            <p class="text-gray-500 text-xl">You don't have any order yet.</p>
           </div>
         </div>
       </section>

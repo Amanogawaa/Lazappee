@@ -5,46 +5,46 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-8">
         <div class="shrink-0">
-          <h1
-            class="text-2xl font-extrabold leading-none tracking-tight text-gray-900"
+          <a
+            routerLink="product-page"
+            class="text-2xl font-extrabold leading-none tracking-tight text-gray-900 cursor-pointer"
           >
             Lazappee
-          </h1>
+          </a>
         </div>
-        <ul
-          class="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center"
-        >
-          <li>
-            <a
-              routerLink="product-page"
-              routerLinkActive="underline "
-              class="flex cursor-pointer text-base font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-            >
-              Browse Products
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="myorder-page"
-              routerLinkActive="underline "
-              class="flex cursor-pointer text-base font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-            >
-              My Orders
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="mycart-page"
-              routerLinkActive="underline "
-              class="flex cursor-pointer text-base font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-            >
-              My Cart
-            </a>
-          </li>
-        </ul>
       </div>
 
       <div class="flex items-center lg:space-x-2">
+        <button
+          routerLink="mycart-page"
+          class="inline-flex items-center relative rounded-full justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white"
+        >
+          <div
+            class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-1 dark:border-gray-900"
+          >
+            {{ items.length }}
+          </div>
+
+          <span class="sr-only"> Cart </span>
+          <svg
+            class="w-6 h-6 lg:me-1"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
+            />
+          </svg>
+        </button>
+
         <button
           id="userDropdownButton1"
           data-dropdown-toggle="userDropdown1"

@@ -34,12 +34,26 @@ export class PlaceorderComponent implements OnInit {
   }
 
   orderItems() {
-    const orderData = this.data.items.map((item: any) => ({
+    // Initialize an empty array to hold the items
+    const itemsArray: { product_id: any; quantity: any; price: any }[] = [];
+
+    // Iterate over the items to build the array
+    this.data.items.forEach((item: any) => {
+      itemsArray.push({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      });
+    });
+
+    // Build the orderData object
+    const orderData = {
       user_id: this.data.user_id,
-      product_id: item.product_id,
-      quantity: item.quantity,
       cart_id: this.data.cart_id,
-    }));
+      items: itemsArray,
+    };
+
+    console.log(orderData);
 
     Swal.fire({
       title: 'Are you sure you want to purchase these items?',

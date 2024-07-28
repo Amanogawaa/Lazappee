@@ -29,10 +29,11 @@ export class MyorderPageComponent implements OnInit {
     });
   }
 
-  cancelOrder(order_id: any) {
+  cancelOrder(product_id: any, order_id: any) {
     const data = {
       user_id: this.currId,
       order_id: order_id,
+      product_id: product_id,
     };
 
     Swal.fire({

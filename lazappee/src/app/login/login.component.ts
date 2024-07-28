@@ -28,7 +28,10 @@ export class LoginComponent implements OnInit {
 
   passwordFieldType: string = 'password';
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const token = sessionStorage.getItem('token');
+    console.log(token);
+  }
 
   loginStudent() {
     if (this.loginForm.valid) {
@@ -38,8 +41,10 @@ export class LoginComponent implements OnInit {
             sessionStorage.setItem('token', res.token);
             const Toast = Swal.mixin({
               toast: true,
-              position: 'top-end',
+              position: 'bottom-end',
               showConfirmButton: false,
+              background: '#fff',
+              color: '#111',
               timer: 1500,
               timerProgressBar: true,
               didOpen: (toast) => {
